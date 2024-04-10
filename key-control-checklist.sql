@@ -8,20 +8,23 @@ WITH
                     DATE_ADD(CURRENT_DATE, INTERVAL - 5 DAY),
                     DATE_ADD(CURRENT_DATE, INTERVAL - 1 DAY)
                 )
-            ) AS DATE
+            ) AS scafdate
     ),
     breakdown_scaffold AS (
         SELECT DISTINCT
-            ErrorMessageID AS breakdown
+            'F12-M' AS control,
+            CAST(ErrorMessageID AS STRING) AS breakdown
         FROM
             revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary
         UNION DISTINCT
         SELECT DISTINCT
+            'IME01-W' AS control,
             ErrorMessageID AS breakdown
         FROM
             revenue-assurance-prod.ime_suspense.IME_Tableau_Summary
         UNION DISTINCT
         SELECT DISTINCT
+            'A04-Q' AS control,
             sap_exception AS breakdown
         FROM
             revenue-assurance-prod.control_a04q_rebill.alteryx_output
@@ -31,27 +34,28 @@ WITH
                 'SAP data not found',
                 'No SAP Exceptions'
             )
-        UNION DISTINCT
     ),
     date_breakdown_scaffold AS (
         SELECT
-            date_scaffold.date,
+            breakdown_scaffold.control,
+            date_scaffold.scafdate,
             breakdown_scaffold.breakdown
         FROM
             date_scaffold
             CROSS JOIN breakdown_scaffold
-    ) f12m_data AS (
+    ),
+    f12m_data AS (
         SELECT
             "F12-M" AS `Control`,
             CAST(ErrorMessageID AS STRING) AS Breakdown,
+            scafdate AS `Date`,
             CountOfErrors AS COUNT,
-            scafdate AS DATE,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
         FROM
             (
                 SELECT
-                    scaffold.date AS scafdate,
+                    date_breakdown_scaffold.scafdate,
                     ErrorMessageID,
                     ChargeStartDate,
                     CountOfErrors,
@@ -83,22 +87,22 @@ WITH
                         )
                     ) * 100 AS pct_diff
                 FROM
-                    scaffold
-                    LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary a ON scaffold.date = a.ChargeStartDate
+                    date_breakdown_scaffold
+                    LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary a ON date_breakdown_scaffold.scafdate = a.ChargeStartDate
             )
     ),
     ime01w_data AS (
         SELECT
             "IME01-W" AS `Control`,
             CAST(ErrorMessageID AS STRING) AS `Breakdown`,
-            CountOfErrors AS `Count`,
             scafdate AS `Date`,
+            CountOfErrors AS `Count`,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
         FROM
             (
                 SELECT
-                    scaffold.date AS scafdate,
+                    date_breakdown_scaffold.scafdate,
                     ErrorMessageID,
                     ChargeStartDate,
                     CountOfErrors,
@@ -130,8 +134,8 @@ WITH
                         )
                     ) * 100 AS pct_diff
                 FROM
-                    scaffold
-                    LEFT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary a ON scaffold.date = a.ChargeStartDate
+                    date_breakdown_scaffold
+                    LEFT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary a ON date_breakdown_scaffold.scafdate = a.ChargeStartDate
             )
         WHERE
             pct_diff IS NOT NULL
@@ -139,9 +143,9 @@ WITH
     a04q_data AS (
         SELECT
             "A04-Q" AS `Control`,
-            sap_exception AS `Breakdown`,
-            control_count AS `Control Count`,
+            breakdown AS `Breakdown`,
             scafdate AS `Date`,
+            control_count AS `Control Count`,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
         FROM
@@ -149,29 +153,29 @@ WITH
                 SELECT
                     scafdate,
                     control_count,
-                    IFNULL(sap_exception, 'No SAP Exceptions') AS sap_exception,
+                    breakdown,
                     LAG(control_count) OVER (
                         PARTITION BY
-                            sap_exception
+                            breakdown
                         ORDER BY
                             scafdate
                     ) AS errors_yesterday,
                     control_count-LAG (control_count) OVER (
                         PARTITION BY
-                            sap_exception
+                            breakdown
                         ORDER BY
                             scafdate
                     ) AS actual_diff,
                     SAFE_DIVIDE(
                         control_count-LAG (control_count) OVER (
                             PARTITION BY
-                                sap_exception
+                                breakdown
                             ORDER BY
                                 scafdate
                         ),
                         LAG(control_count) OVER (
                             PARTITION BY
-                                sap_exception
+                                breakdown
                             ORDER BY
                                 scafdate
                         )
@@ -179,7 +183,8 @@ WITH
                 FROM
                     (
                         SELECT
-                            scaffold.date AS scafdate,
+                            date_breakdown_scaffold.scafdate,
+                            date_breakdown_scaffold.breakdown,
                             sap_exception,
                             CAST(crc_created_on AS DATE) AS crc_created_on,
                             COUNTIF(
@@ -190,21 +195,18 @@ WITH
                                 )
                             ) AS control_count
                         FROM
-                            scaffold
-                            LEFT JOIN revenue-assurance-prod.control_a04q_rebill.alteryx_output a ON scaffold.date = CAST(a.crc_created_on AS DATE)
+                            date_breakdown_scaffold
+                            LEFT JOIN revenue-assurance-prod.control_a04q_rebill.alteryx_output a ON date_breakdown_scaffold.scafdate = CAST(a.crc_created_on AS DATE)
+                            AND date_breakdown_scaffold.breakdown = a.sap_exception
+                        WHERE
+                            date_breakdown_scaffold.control = 'A04-Q'
                         GROUP BY
-                            scaffold.date,
+                            date_breakdown_scaffold.scafdate,
+                            date_breakdown_scaffold.breakdown,
                             sap_exception,
                             crc_created_on
                     )
             )
-        WHERE
-            sap_exception IN (
-                'Exception, SAP data found but totals mismatch',
-                'SAP data not found',
-                'No SAP Exceptions'
-            )
-            OR sap_exception IS NULL
     )
 SELECT
     *
