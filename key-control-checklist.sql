@@ -133,8 +133,8 @@ WITH
                             ) AS control_count
                         FROM
                             date_breakdown_scaffold
-                            LEFT JOIN revenue-assurance-prod.control_a04q_rebill.alteryx_output a ON date_breakdown_scaffold.scafdate = CAST(a.crc_created_on AS DATE)
-                            AND date_breakdown_scaffold.breakdown = a.sap_exception
+                            LEFT JOIN revenue-assurance-prod.control_a04q_rebill.alteryx_output a04q ON date_breakdown_scaffold.scafdate = CAST(a04q.crc_created_on AS DATE)
+                            AND date_breakdown_scaffold.breakdown = a04q.sap_exception
                         WHERE
                             date_breakdown_scaffold.control = 'A04-Q'
                         GROUP BY
@@ -195,8 +195,8 @@ WITH
                     ) * 100 AS pct_diff
                 FROM
                     date_breakdown_scaffold
-                    LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary a ON date_breakdown_scaffold.scafdate = a.ChargeStartDate
-                    AND date_breakdown_scaffold.breakdown = CAST(a.ErrorMessageID AS STRING)
+                    LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary f12m ON date_breakdown_scaffold.scafdate = f12m.ChargeStartDate
+                    AND date_breakdown_scaffold.breakdown = CAST(f12m.ErrorMessageID AS STRING)
                 WHERE
                     date_breakdown_scaffold.control = 'F12-M'
             )
@@ -251,8 +251,8 @@ WITH
                     ) * 100 AS pct_diff
                 FROM
                     date_breakdown_scaffold
-                    RIGHT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary a ON date_breakdown_scaffold.scafdate = a.ChargeStartDate
-                    AND date_breakdown_scaffold.breakdown = a.ErrorMessageID
+                    RIGHT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary ime01w ON date_breakdown_scaffold.scafdate = ime01w.ChargeStartDate
+                    AND date_breakdown_scaffold.breakdown = ime01w.ErrorMessageID
                 WHERE
                     date_breakdown_scaffold.control = 'IME01-W'
             )
@@ -332,9 +332,9 @@ WITH
                                             IME_v_SV_difference
                                         )
                                     )
-                            ) a ON date_breakdown_scaffold.scafdate = a.ime_ime_file_date
-                            AND date_breakdown_scaffold.breakdown = CONCAT(a.traffic_type, ' - ', a.IME_AcquisitionPortal)
-                            AND date_breakdown_scaffold.metric = a.metric
+                            ) ime02w ON date_breakdown_scaffold.scafdate = ime02w.ime_ime_file_date
+                            AND date_breakdown_scaffold.breakdown = CONCAT(ime02w.traffic_type, ' - ', ime02w.IME_AcquisitionPortal)
+                            AND date_breakdown_scaffold.metric = ime02w.metric
                         WHERE
                             date_breakdown_scaffold.control = 'IME02-W'
                         GROUP BY
