@@ -44,6 +44,83 @@ WITH
             date_scaffold
             CROSS JOIN breakdown_scaffold
     ),
+    a04q_data AS (
+        SELECT
+            "A04-Q" AS `Control`,
+            scafdate AS `Date`,
+            last_refresh AS `Last Refresh`,
+            breakdown AS `Breakdown`,
+            'Control Count' AS `Metric`,
+            control_count AS `Control Count`,
+            actual_diff AS `Actual Difference vs Yesterday`,
+            pct_diff `Pct Difference vs Yesterday`
+        FROM
+            (
+                SELECT
+                    scafdate,
+                    last_refresh,
+                    breakdown,
+                    control_count,
+                    LAG(control_count) OVER (
+                        PARTITION BY
+                            breakdown
+                        ORDER BY
+                            scafdate
+                    ) AS errors_yesterday,
+                    control_count - LAG(control_count) OVER (
+                        PARTITION BY
+                            breakdown
+                        ORDER BY
+                            scafdate
+                    ) AS actual_diff,
+                    SAFE_DIVIDE(
+                        control_count - LAG(control_count) OVER (
+                            PARTITION BY
+                                breakdown
+                            ORDER BY
+                                scafdate
+                        ),
+                        LAG(control_count) OVER (
+                            PARTITION BY
+                                breakdown
+                            ORDER BY
+                                scafdate
+                        )
+                    ) * 100 AS pct_diff
+                FROM
+                    (
+                        SELECT
+                            date_breakdown_scaffold.scafdate,
+                            (
+                                SELECT
+                                    MAX(CAST(crc_created_on AS DATE))
+                                FROM
+                                    revenue-assurance-prod.control_a04q_rebill.alteryx_output
+                            ) AS last_refresh,
+                            date_breakdown_scaffold.breakdown,
+                            sap_exception,
+                            CAST(crc_created_on AS DATE) AS crc_created_on,
+                            COUNTIF(
+                                sap_exception IS NOT NULL
+                                AND sap_exception IN (
+                                    'Exception, SAP data found but totals mismatch',
+                                    'SAP data not found'
+                                )
+                            ) AS control_count
+                        FROM
+                            date_breakdown_scaffold
+                            LEFT JOIN revenue-assurance-prod.control_a04q_rebill.alteryx_output a ON date_breakdown_scaffold.scafdate = CAST(a.crc_created_on AS DATE)
+                            AND date_breakdown_scaffold.breakdown = a.sap_exception
+                        WHERE
+                            date_breakdown_scaffold.control = 'A04-Q'
+                        GROUP BY
+                            date_breakdown_scaffold.scafdate,
+                            date_breakdown_scaffold.breakdown,
+                            sap_exception,
+                            crc_created_on
+                    )
+            )
+    ),
     f12m_data AS (
         SELECT
             "F12-M" AS `Control`,
@@ -58,7 +135,12 @@ WITH
             (
                 SELECT
                     date_breakdown_scaffold.scafdate,
-                    (SELECT MAX(ChargeStartDate) FROM revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary) AS last_refresh,
+                    (
+                        SELECT
+                            MAX(ChargeStartDate)
+                        FROM
+                            revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary
+                    ) AS last_refresh,
                     breakdown,
                     IFNULL(CountOfErrors, 0) AS CountOfErrors,
                     LAG(CountOfErrors) OVER (
@@ -109,7 +191,12 @@ WITH
             (
                 SELECT
                     date_breakdown_scaffold.scafdate,
-                    (SELECT MAX(ChargeStartDate) FROM revenue-assurance-prod.ime_suspense.IME_Tableau_Summary) AS last_refresh,
+                    (
+                        SELECT
+                            MAX(ChargeStartDate)
+                        FROM
+                            revenue-assurance-prod.ime_suspense.IME_Tableau_Summary
+                    ) AS last_refresh,
                     breakdown,
                     IFNULL(CountOfErrors, 0) AS CountOfErrors,
                     LAG(CountOfErrors) OVER (
@@ -144,78 +231,6 @@ WITH
                     AND date_breakdown_scaffold.breakdown = a.ErrorMessageID
                 WHERE
                     date_breakdown_scaffold.control = 'IME01-W'
-            )
-    ),
-    a04q_data AS (
-        SELECT
-            "A04-Q" AS `Control`,
-            scafdate AS `Date`,
-            last_refresh AS `Last Refresh`,
-            breakdown AS `Breakdown`,
-            'Control Count' AS `Metric`,
-            control_count AS `Control Count`,
-            actual_diff AS `Actual Difference vs Yesterday`,
-            pct_diff `Pct Difference vs Yesterday`
-        FROM
-            (
-                SELECT
-                    scafdate,
-                    last_refresh,
-                    breakdown,
-                    control_count,
-                    LAG(control_count) OVER (
-                        PARTITION BY
-                            breakdown
-                        ORDER BY
-                            scafdate
-                    ) AS errors_yesterday,
-                    control_count - LAG(control_count) OVER (
-                        PARTITION BY
-                            breakdown
-                        ORDER BY
-                            scafdate
-                    ) AS actual_diff,
-                    SAFE_DIVIDE(
-                        control_count - LAG(control_count) OVER (
-                            PARTITION BY
-                                breakdown
-                            ORDER BY
-                                scafdate
-                        ),
-                        LAG(control_count) OVER (
-                            PARTITION BY
-                                breakdown
-                            ORDER BY
-                                scafdate
-                        )
-                    ) * 100 AS pct_diff
-                FROM
-                    (
-                        SELECT
-                            date_breakdown_scaffold.scafdate,
-                            (SELECT MAX(CAST(crc_created_on AS DATE)) FROM revenue-assurance-prod.control_a04q_rebill.alteryx_output) AS last_refresh,
-                            date_breakdown_scaffold.breakdown,
-                            sap_exception,
-                            CAST(crc_created_on AS DATE) AS crc_created_on,
-                            COUNTIF(
-                                sap_exception IS NOT NULL
-                                AND sap_exception IN (
-                                    'Exception, SAP data found but totals mismatch',
-                                    'SAP data not found'
-                                )
-                            ) AS control_count
-                        FROM
-                            date_breakdown_scaffold
-                            LEFT JOIN revenue-assurance-prod.control_a04q_rebill.alteryx_output a ON date_breakdown_scaffold.scafdate = CAST(a.crc_created_on AS DATE)
-                            AND date_breakdown_scaffold.breakdown = a.sap_exception
-                        WHERE
-                            date_breakdown_scaffold.control = 'A04-Q'
-                        GROUP BY
-                            date_breakdown_scaffold.scafdate,
-                            date_breakdown_scaffold.breakdown,
-                            sap_exception,
-                            crc_created_on
-                    )
             )
     )
 SELECT
