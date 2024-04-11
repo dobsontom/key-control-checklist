@@ -160,14 +160,14 @@ WITH
                         ORDER BY
                             scafdate
                     ) AS errors_yesterday,
-                    control_count-LAG (control_count) OVER (
+                    control_count - LAG(control_count) OVER (
                         PARTITION BY
                             breakdown
                         ORDER BY
                             scafdate
                     ) AS actual_diff,
                     SAFE_DIVIDE(
-                        control_count-LAG (control_count) OVER (
+                        control_count - LAG(control_count) OVER (
                             PARTITION BY
                                 breakdown
                             ORDER BY
