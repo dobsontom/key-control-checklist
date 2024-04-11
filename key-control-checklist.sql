@@ -48,7 +48,9 @@ WITH
         SELECT
             "F12-M" AS `Control`,
             scafdate AS `Date`,
+            last_refresh AS `Last Refresh`,
             breakdown AS `Breakdown`,
+            'Count of Errors' AS `Metric`,
             CountOfErrors AS `Count`,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
@@ -56,6 +58,7 @@ WITH
             (
                 SELECT
                     date_breakdown_scaffold.scafdate,
+                    (SELECT MAX(ChargeStartDate) FROM revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary) AS last_refresh,
                     breakdown,
                     IFNULL(CountOfErrors, 0) AS CountOfErrors,
                     LAG(CountOfErrors) OVER (
@@ -96,7 +99,9 @@ WITH
         SELECT
             "IME01-W" AS `Control`,
             scafdate AS `Date`,
+            last_refresh AS `Last Refresh`,
             breakdown AS `Breakdown`,
+            'Count of Errors' AS `Metric`,
             CountOfErrors AS `Count`,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
@@ -104,6 +109,7 @@ WITH
             (
                 SELECT
                     date_breakdown_scaffold.scafdate,
+                    (SELECT MAX(ChargeStartDate) FROM revenue-assurance-prod.ime_suspense.IME_Tableau_Summary) AS last_refresh,
                     breakdown,
                     IFNULL(CountOfErrors, 0) AS CountOfErrors,
                     LAG(CountOfErrors) OVER (
@@ -144,7 +150,9 @@ WITH
         SELECT
             "A04-Q" AS `Control`,
             scafdate AS `Date`,
+            last_refresh AS `Last Refresh`,
             breakdown AS `Breakdown`,
+            'Control Count' AS `Metric`,
             control_count AS `Control Count`,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
@@ -152,8 +160,9 @@ WITH
             (
                 SELECT
                     scafdate,
-                    control_count,
+                    last_refresh,
                     breakdown,
+                    control_count,
                     LAG(control_count) OVER (
                         PARTITION BY
                             breakdown
@@ -184,6 +193,7 @@ WITH
                     (
                         SELECT
                             date_breakdown_scaffold.scafdate,
+                            (SELECT MAX(CAST(crc_created_on AS DATE)) FROM revenue-assurance-prod.control_a04q_rebill.alteryx_output) AS last_refresh,
                             date_breakdown_scaffold.breakdown,
                             sap_exception,
                             CAST(crc_created_on AS DATE) AS crc_created_on,
