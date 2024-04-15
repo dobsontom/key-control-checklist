@@ -24,6 +24,35 @@ WITH
                 'No SAP Exceptions'
             )
         UNION DISTINCT
+        -- A17-M has one metric (count of rows) and two breakdown fields which need to be merged into a single breakdown
+        -- field to create scaffolding.
+        SELECT DISTINCT
+            'A17-M' AS control,
+            breakdown,
+            'Count of Rows' AS metric
+        FROM
+            revenue-assurance-prod.control_ime_sv.IME_SV_Summary
+            CROSS JOIN (
+                SELECT
+                    breakdown
+                FROM
+                    (
+                        SELECT DISTINCT
+                            CAST(sap_net_value AS STRING) AS breakdown
+                        FROM
+                            revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
+                        WHERE
+                            sap_net_value IS NULL
+                        UNION ALL
+                        SELECT DISTINCT
+                            is_vessel_ooc AS breakdown
+                        FROM
+                            revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
+                        WHERE
+                            is_vessel_ooc = 'Vessel is inside committment period'
+                    )
+            )
+        UNION DISTINCT
         SELECT DISTINCT
             'F12-M' AS control,
             CAST(ErrorMessageID AS STRING) AS breakdown,
@@ -258,6 +287,7 @@ WITH
             )
     ),
     ime02w_data AS (
+        -- Select and format only the required fields to create the unified format.
         SELECT
             "IME02-W" AS `Control`,
             scafdate AS `Date`,
@@ -268,6 +298,7 @@ WITH
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
         FROM
+            -- Calculate the difference in incidents to the previous day for each 'breakdown' and metric.
             (
                 SELECT
                     scafdate,
@@ -310,6 +341,7 @@ WITH
                         SELECT
                             date_breakdown_scaffold.scafdate,
                             date_breakdown_scaffold.breakdown,
+                            -- Get the latest date in the table to use for last refresh indicator.
                             (
                                 SELECT
                                     MAX(ime_ime_file_date)
@@ -317,10 +349,13 @@ WITH
                                     revenue-assurance-prod.control_ime_sv.IME_SV_Summary
                             ) AS last_refresh,
                             date_breakdown_scaffold.metric,
+                            -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
                             IFNULL(SUM(control_count), 0) AS control_count,
                         FROM
                             date_breakdown_scaffold
+                            -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
                             LEFT JOIN (
+                                -- Unpivot multiple metrics into a single field that can be used in the unified format.
                                 SELECT
                                     *
                                 FROM
@@ -333,7 +368,11 @@ WITH
                                         )
                                     )
                             ) ime02w ON date_breakdown_scaffold.scafdate = ime02w.ime_ime_file_date
-                            AND date_breakdown_scaffold.breakdown = CONCAT(ime02w.traffic_type, ' - ', ime02w.IME_AcquisitionPortal)
+                            AND date_breakdown_scaffold.breakdown = CONCAT(
+                                ime02w.traffic_type,
+                                ' - ',
+                                ime02w.IME_AcquisitionPortal
+                            )
                             AND date_breakdown_scaffold.metric = ime02w.metric
                         WHERE
                             date_breakdown_scaffold.control = 'IME02-W'
