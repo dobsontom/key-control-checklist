@@ -24,6 +24,43 @@ WITH
                 'No SAP Exceptions'
             )
         UNION DISTINCT
+        SELECT DISTINCT
+            'A06-M' AS control,
+            'None' AS scafbreakdown,
+            metric AS scafmetric
+        FROM
+            revenue-assurance-prod.control_a06m_leases.vw_control_monthly
+            CROSS JOIN (
+                SELECT
+                    metric
+                    -- Need to create unified metric column via union rather than unpivot, as can't unpivot
+                    -- fields with different data types into the same field.
+                FROM
+                    (
+                        SELECT DISTINCT
+                            IF(
+                                billed_as_expected,
+                                'Billed as Planned',
+                                'Not Billed as Planned'
+                            ) AS metric
+                        FROM
+                            revenue-assurance-prod.control_a06m_leases.vw_control_monthly
+                        WHERE
+                            billed_as_expected = TRUE
+                        UNION ALL
+                        SELECT DISTINCT
+                            IF(
+                                lease_contract_number LIKE '%FREE%',
+                                'Unpriced Lease',
+                                'Priced Lease'
+                            ) AS metric
+                        FROM
+                            revenue-assurance-prod.control_a06m_leases.vw_control_monthly
+                        WHERE
+                            lease_contract_number LIKE '%FREE%'
+                    )
+            )
+        UNION DISTINCT
         -- A17-M has one metric (count of rows) and two breakdown fields which need to be merged into a single breakdown
         -- field to create full scaffolding.
         SELECT DISTINCT
@@ -96,8 +133,8 @@ WITH
         SELECT
             breakdown_scaffold.control,
             date_scaffold.scafdate,
-            breakdown_scaffold.scafbreakdown,
-            breakdown_scaffold.scafmetric
+            breakdown_scaffold.scafmetric,
+            breakdown_scaffold.scafbreakdown
         FROM
             date_scaffold
             CROSS JOIN breakdown_scaffold
@@ -495,18 +532,18 @@ SELECT
     *
 FROM
     a17m_data
--- UNION ALL
--- SELECT
---     *
--- FROM
---     f12m_data
--- UNION ALL
--- SELECT
---     *
--- FROM
---     ime01w_data
--- UNION ALL
--- SELECT
---     *
--- FROM
---     ime02w_data;
+UNION ALL
+SELECT
+    *
+FROM
+    f12m_data
+UNION ALL
+SELECT
+    *
+FROM
+    ime01w_data
+UNION ALL
+SELECT
+    *
+FROM
+    ime02w_data;
