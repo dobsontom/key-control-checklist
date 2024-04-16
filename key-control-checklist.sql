@@ -14,7 +14,7 @@ WITH
         SELECT DISTINCT
             'A04-Q' AS control,
             sap_exception AS scafbreakdown,
-            'Control Count' AS metric
+            'Control Count' AS scafmetric
         FROM
             revenue-assurance-prod.control_a04q_rebill.alteryx_output
         WHERE
@@ -28,14 +28,14 @@ WITH
         -- field to create full scaffolding.
         SELECT DISTINCT
             'A17-M' AS control,
-            breakdown AS scafbreakdown,
-            'Count of Rows' AS metric
+            'None' AS scafbreakdown,
+            metric AS scafmetric
         FROM
             revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
             CROSS JOIN (
                 SELECT
-                    breakdown
-                    -- Need to create unified breakdown column via unions rather than unpivot, as can't unpivot
+                    metric
+                    -- Need to create unified metric column via unions rather than unpivot, as can't unpivot
                     -- fields with different data types, even when casting as string.
                 FROM
                     (
@@ -43,14 +43,14 @@ WITH
                             IFNULL(
                                 CAST(sap_net_value AS STRING),
                                 'Null SAP Net Value'
-                            ) AS breakdown
+                            ) AS metric
                         FROM
                             revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
                         WHERE
                             sap_net_value IS NULL
                         UNION ALL
                         SELECT DISTINCT
-                            is_vessel_ooc AS breakdown
+                            is_vessel_ooc AS metric
                         FROM
                             revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
                         WHERE
@@ -61,21 +61,21 @@ WITH
         SELECT DISTINCT
             'F12-M' AS control,
             CAST(ErrorMessageID AS STRING) AS scafbreakdown,
-            'Count of Errors' AS metric
+            'Count of Errors' AS scafmetric
         FROM
             revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary
         UNION DISTINCT
         SELECT DISTINCT
             'IME01-W' AS control,
             ErrorMessageID AS scafbreakdown,
-            'Count of Errors' AS metric
+            'Count of Errors' AS scafmetric
         FROM
             revenue-assurance-prod.ime_suspense.IME_Tableau_Summary
         UNION DISTINCT
         SELECT DISTINCT
             'IME02-W' AS control,
             CONCAT(traffic_type, ' - ', IME_AcquisitionPortal) AS scafbreakdown,
-            metric
+            metric AS scafmetric
         FROM
             revenue-assurance-prod.control_ime_sv.IME_SV_Summary
             CROSS JOIN (
@@ -97,7 +97,7 @@ WITH
             breakdown_scaffold.control,
             date_scaffold.scafdate,
             breakdown_scaffold.scafbreakdown,
-            breakdown_scaffold.metric
+            breakdown_scaffold.scafmetric
         FROM
             date_scaffold
             CROSS JOIN breakdown_scaffold
@@ -183,8 +183,8 @@ WITH
             "A17-M" AS `Control`,
             scafdate AS `Date`,
             last_refresh AS `Last Refresh`,
-            scafbreakdown AS `Breakdown`,
-            'Control Count' AS `Metric`,
+            'None' AS `Breakdown`,
+            scafmetric AS `Metric`,
             control_count AS `Control Count`,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
@@ -193,30 +193,30 @@ WITH
                 SELECT
                     scafdate,
                     last_refresh,
-                    scafbreakdown,
+                    scafmetric,
                     control_count,
                     LAG(control_count) OVER (
                         PARTITION BY
-                            scafbreakdown
+                            scafmetric
                         ORDER BY
                             scafdate
                     ) AS errors_yesterday,
                     control_count - LAG(control_count) OVER (
                         PARTITION BY
-                            scafbreakdown
+                            scafmetric
                         ORDER BY
                             scafdate
                     ) AS actual_diff,
                     SAFE_DIVIDE(
                         control_count - LAG(control_count) OVER (
                             PARTITION BY
-                                scafbreakdown
+                                scafmetric
                             ORDER BY
                                 scafdate
                         ),
                         LAG(control_count) OVER (
                             PARTITION BY
-                                scafbreakdown
+                                scafmetric
                             ORDER BY
                                 scafdate
                         )
@@ -231,13 +231,13 @@ WITH
                                 FROM
                                     revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
                             ) AS last_refresh,
-                            date_breakdown_scaffold.scafbreakdown,
-                            a17m.breakdown AS breakdown,
+                            date_breakdown_scaffold.scafmetric,
+                            a17m.metric,
                             CAST(billing_task_completed_on AS DATE) AS billing_task_completed_on,
                             -- Count the number of incidents from the original data source rather than
                             -- from the scaffold.
                             COUNTIF(
-                                a17m.breakdown IN (
+                                a17m.metric IN (
                                     'Null SAP Net Value',
                                     'Vessel is inside committment period'
                                 )
@@ -245,14 +245,14 @@ WITH
                         FROM
                             date_breakdown_scaffold
                             LEFT JOIN (
-                                -- Union the two breakdowns into a single field and perform a left join to the scaffold
-                                -- to get a row for every day and for every breakdown value.
+                                -- Union the two metrics into a single field and perform a left join to the scaffold
+                                -- to get a row for every day and for every metric.
                                 SELECT
                                     billing_task_completed_on,
                                     IFNULL(
                                         CAST(sap_net_value AS STRING),
                                         'Null SAP Net Value'
-                                    ) AS breakdown
+                                    ) AS metric
                                 FROM
                                     revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
                                 WHERE
@@ -260,20 +260,20 @@ WITH
                                 UNION ALL
                                 SELECT
                                     billing_task_completed_on,
-                                    is_vessel_ooc AS breakdown
+                                    is_vessel_ooc AS metric
                                 FROM
                                     revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
                                 WHERE
                                     is_vessel_ooc = 'Vessel is inside committment period'
                             ) a17m ON date_breakdown_scaffold.scafdate = CAST(a17m.billing_task_completed_on AS DATE)
-                            AND date_breakdown_scaffold.scafbreakdown = a17m.breakdown
+                            AND date_breakdown_scaffold.scafmetric = a17m.metric
                         WHERE
                             date_breakdown_scaffold.control = 'A17-M'
                         GROUP BY
                             date_breakdown_scaffold.scafdate,
                             a17m.billing_task_completed_on,
-                            date_breakdown_scaffold.scafbreakdown,
-                            a17m.breakdown
+                            date_breakdown_scaffold.scafmetric,
+                            a17m.metric
                     )
             )
     ),
@@ -396,7 +396,7 @@ WITH
             scafdate AS `Date`,
             last_refresh AS `Last Refresh`,
             scafbreakdown AS `Breakdown`,
-            metric AS `Metric`,
+            scafmetric AS `Metric`,
             control_count AS `Control Count`,
             actual_diff AS `Actual Difference vs Yesterday`,
             pct_diff `Pct Difference vs Yesterday`
@@ -407,19 +407,19 @@ WITH
                     scafdate,
                     last_refresh,
                     scafbreakdown,
-                    metric,
+                    scafmetric,
                     control_count,
                     LAG(control_count) OVER (
                         PARTITION BY
                             scafbreakdown,
-                            metric
+                            scafmetric
                         ORDER BY
                             scafdate
                     ) AS errors_yesterday,
                     control_count - LAG(control_count) OVER (
                         PARTITION BY
                             scafbreakdown,
-                            metric
+                            scafmetric
                         ORDER BY
                             scafdate
                     ) AS actual_diff,
@@ -427,14 +427,14 @@ WITH
                         control_count - LAG(control_count) OVER (
                             PARTITION BY
                                 scafbreakdown,
-                                metric
+                                scafmetric
                             ORDER BY
                                 scafdate
                         ),
                         LAG(control_count) OVER (
                             PARTITION BY
                                 scafbreakdown,
-                                metric
+                                scafmetric
                             ORDER BY
                                 scafdate
                         )
@@ -451,7 +451,7 @@ WITH
                                 FROM
                                     revenue-assurance-prod.control_ime_sv.IME_SV_Summary
                             ) AS last_refresh,
-                            date_breakdown_scaffold.metric,
+                            date_breakdown_scaffold.scafmetric,
                             -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
                             IFNULL(SUM(control_count), 0) AS control_count,
                         FROM
@@ -476,13 +476,13 @@ WITH
                                 ' - ',
                                 ime02w.IME_AcquisitionPortal
                             )
-                            AND date_breakdown_scaffold.metric = ime02w.metric
+                            AND date_breakdown_scaffold.scafmetric = ime02w.metric
                         WHERE
                             date_breakdown_scaffold.control = 'IME02-W'
                         GROUP BY
                             date_breakdown_scaffold.scafdate,
                             date_breakdown_scaffold.scafbreakdown,
-                            metric
+                            scafmetric
                     )
             )
     )
@@ -495,18 +495,18 @@ SELECT
     *
 FROM
     a17m_data
-UNION ALL
-SELECT
-    *
-FROM
-    f12m_data
-UNION ALL
-SELECT
-    *
-FROM
-    ime01w_data
-UNION ALL
-SELECT
-    *
-FROM
-    ime02w_data;
+-- UNION ALL
+-- SELECT
+--     *
+-- FROM
+--     f12m_data
+-- UNION ALL
+-- SELECT
+--     *
+-- FROM
+--     ime01w_data
+-- UNION ALL
+-- SELECT
+--     *
+-- FROM
+--     ime02w_data;
