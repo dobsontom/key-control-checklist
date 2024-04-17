@@ -25,9 +25,7 @@ WITH
             scaf.control = 'A04-Q'
         GROUP BY
             scaf.scafdate,
-            crc_created_on,
-            scaf.scafbreakdown,
-            sap_exception
+            scaf.scafbreakdown
     ),
     a06m_data AS (
         SELECT
@@ -77,15 +75,13 @@ WITH
                     revenue-assurance-prod.control_a06m_leases.vw_control_monthly
                 WHERE
                     lease_contract_number LIKE '%FREE%'
-            ) a06m ON scafdate = CAST(a06m.contract_start_date AS DATE)
-            AND scafmetric = a06m.metric
+            ) a06m ON scaf.scafdate = CAST(a06m.contract_start_date AS DATE)
+            AND scaf.scafmetric = a06m.metric
         WHERE
-            control = 'A06-M'
+            scaf.control = 'A06-M'
         GROUP BY
-            scafdate,
-            a06m.contract_start_date,
-            scafmetric,
-            a06m.metric
+            scaf.scafdate,
+            scaf.scafmetric
     ),
     a17m_data AS (
         SELECT
@@ -130,15 +126,13 @@ WITH
                     revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
                 WHERE
                     is_vessel_ooc = 'Vessel is inside committment period'
-            ) a17m ON scafdate = CAST(a17m.billing_task_completed_on AS DATE)
-            AND scafmetric = a17m.metric
+            ) a17m ON scaf.scafdate = CAST(a17m.billing_task_completed_on AS DATE)
+            AND scaf.scafmetric = a17m.metric
         WHERE
             control = 'A17-M'
         GROUP BY
-            scafdate,
-            a17m.billing_task_completed_on,
-            scafmetric,
-            a17m.metric
+            scaf.scafdate,
+            scaf.scafmetric
     ),
     f12m_data AS (
         SELECT
@@ -155,8 +149,8 @@ WITH
             IFNULL(CountOfErrors, 0) control_count
         FROM
             revenue-assurance-prod.key_control_checklist.control_scaffold scaf
-            LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary f12m ON scafdate = f12m.ChargeStartDate
-            AND scafbreakdown = CAST(f12m.ErrorMessageID AS STRING)
+            LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary f12m ON scaf.scafdate = f12m.ChargeStartDate
+            AND scaf.scafbreakdown = CAST(f12m.ErrorMessageID AS STRING)
         WHERE
             control = 'F12-M'
     ),
@@ -175,8 +169,8 @@ WITH
             IFNULL(CountOfErrors, 0) AS control_count
         FROM
             revenue-assurance-prod.key_control_checklist.control_scaffold scaf
-            LEFT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary ime01w ON scafdate = ime01w.ChargeStartDate
-            AND scafbreakdown = ime01w.ErrorMessageID
+            LEFT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary ime01w ON scaf.scafdate = ime01w.ChargeStartDate
+            AND scaf.scafbreakdown = ime01w.ErrorMessageID
         WHERE
             control = 'IME01-W'
     ),
@@ -211,19 +205,19 @@ WITH
                             IME_v_SV_difference
                         )
                     )
-            ) ime02w ON scafdate = ime02w.ime_ime_file_date
-            AND scafbreakdown = CONCAT(
+            ) ime02w ON scaf.scafdate = ime02w.ime_ime_file_date
+            AND scaf.scafbreakdown = CONCAT(
                 ime02w.traffic_type,
                 ' - ',
                 ime02w.IME_AcquisitionPortal
             )
-            AND scafmetric = ime02w.metric
+            AND scaf.scafmetric = ime02w.metric
         WHERE
-            control = 'IME02-W'
+            scaf.control = 'IME02-W'
         GROUP BY
-            scafdate,
-            scafbreakdown,
-            scafmetric
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown
     )
     -- Select and format only the required fields to create the unified format.
 SELECT
