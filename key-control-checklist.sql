@@ -134,6 +134,41 @@ WITH
             scaf.scafdate,
             scaf.scafmetric
     ),
+    f01m_data AS (
+        SELECT
+            "F01-M" AS control,
+            scafdate,
+            (
+                SELECT
+                    MAX(project_implementation_confirmed_date)
+                FROM
+                    revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data
+            ) AS last_refresh,
+            'Tasks Remaining' AS scafmetric,
+            scafbreakdown,
+            COUNT(
+                DISTINCT IF(
+                    f01m.billing_status IN (
+                        'No billing available - needs review',
+                        'Old billing - needs review'
+                    )
+                    AND f01m.project_status != 'Stopped'
+                    AND f01m.billed_arrears = 'Not billed in arrears',
+                    project_task_order,
+                    NULL
+                )
+            ) AS control_count
+        FROM
+            revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+            LEFT JOIN revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data f01m ON scaf.scafdate = f01m.project_implementation_confirmed_date
+            AND scaf.scafbreakdown = CAST(f01m.project_type AS STRING)
+        WHERE
+            control = 'F01-M'
+        GROUP BY
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown
+    ),
     f12m_data AS (
         SELECT
             "F12-M" AS control,
@@ -289,6 +324,11 @@ FROM
                     *
                 FROM
                     a17m_data
+                UNION ALL
+                SELECT
+                    *
+                FROM
+                    f01m_data
                 UNION ALL
                 SELECT
                     *
