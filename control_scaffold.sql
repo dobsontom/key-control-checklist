@@ -96,6 +96,19 @@ WITH
             )
         UNION DISTINCT
         SELECT DISTINCT
+            'F01-M' AS control,
+            'Tasks Remaining' AS scafmetric,
+            project_type AS scafbreakdown
+        FROM
+            revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data
+        WHERE
+            project_type IN (
+                'Contract change',
+                'New installation',
+                'Upgrade installation'
+            )
+        UNION DISTINCT
+        SELECT DISTINCT
             'F12-M' AS control,
             'Count of Errors' AS scafmetric,
             CAST(ErrorMessageID AS STRING) AS scafbreakdown
