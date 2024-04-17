@@ -39,7 +39,7 @@ WITH
                     (
                         SELECT DISTINCT
                             IF(
-                                billed_as_expected,
+                                billed_as_expected = TRUE,
                                 'Billed as Planned',
                                 'Not Billed as Planned'
                             ) AS metric
