@@ -141,6 +141,25 @@ WITH
                         )
                     )
             )
+        UNION DISTINCT
+        SELECT DISTINCT
+            'VAR-1' AS control,
+            metric AS scafmetric,
+            value AS scafbreakdown
+        FROM
+            revenue-assurance-prod.control_var_01_leases.monthly_control_output_for_review2 UNPIVOT(
+                value
+                FOR metric IN (category_1, Billed_in_SV_category)
+            )
+        WHERE
+            (
+                metric = 'category_1'
+                AND value = 'Review needed?'
+            )
+            OR (
+                metric = 'Billed_in_SV_category'
+                AND value = 'Billed in last 3 months'
+            )
     )
 SELECT
     breakdown_scaffold.control,
