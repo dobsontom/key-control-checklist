@@ -1,4 +1,36 @@
 WITH
+    a02q_data AS (
+        SELECT
+            control,
+            scafdate,
+            (
+                SELECT
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
+                FROM
+                    `revenue-assurance-prod.control_a02_fx_completeness.__TABLES__`
+                WHERE
+                    table_id = 'output_fx_completeness_snb_control_monthly_data'
+            ) AS last_refresh,
+            scafmetric,
+            scafbreakdown,
+            COUNTIF(
+                category1 IN (
+                    'Review for charges',
+                    'Timing issue - active billing billing task - check in the next control run'
+                )
+            ) AS control_count
+        FROM
+            revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+            LEFT JOIN revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data a02q ON scaf.scafdate = a02q.current_commissioning_confirmed_date
+            AND scaf.scafbreakdown = a02q.category1
+        WHERE
+            control = 'A02-Q'
+        GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown
+    ),
     a04q_data AS (
         SELECT
             control,
@@ -426,6 +458,11 @@ FROM
             ) * 100 AS pct_diff
         FROM
             (
+                SELECT
+                    *
+                FROM
+                    a02q_data
+                UNION ALL
                 SELECT
                     *
                 FROM
