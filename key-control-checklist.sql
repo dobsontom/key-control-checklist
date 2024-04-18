@@ -321,6 +321,36 @@ WITH
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown
+    ),
+    x01b_data AS (
+        SELECT
+            control,
+            scafdate,
+            (
+                SELECT
+                    MAX(stopped_confirmed_date)
+                FROM
+                    revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels
+            ) AS last_refresh,
+            'Row Count' AS scafmetric,
+            scafbreakdown,
+            COUNTIF(
+                category1 IN (
+                    'Review - active temp stop vessel, why billed with original charges',
+                    'Review - why billed with suspended charges although they are reactivated'
+                )
+            ) AS control_count
+        FROM
+            revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+            LEFT JOIN revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels x01b ON scaf.scafdate = x01b.stopped_confirmed_date
+            AND scaf.scafbreakdown = CAST(x01b.category1 AS STRING)
+        WHERE
+            control = 'X01-B'
+        GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown
     )
     -- Select and format only the required fields to create the unified format.
 SELECT
@@ -417,5 +447,10 @@ FROM
                     *
                 FROM
                     var1_data
+                UNION ALL
+                SELECT
+                    *
+                FROM
+                    x01b_data
             )
     );
