@@ -5,9 +5,11 @@ WITH
             scaf.scafdate,
             (
                 SELECT
-                    MAX(CAST(crc_created_on AS DATE))
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_a04q_rebill.alteryx_output
+                    `revenue-assurance-prod.control_a04q_rebill.__TABLES__`
+                WHERE
+                    table_id = 'alteryx_output'
             ) AS last_refresh,
             'Error Count' AS scafmetric,
             scaf.scafbreakdown,
@@ -34,9 +36,11 @@ WITH
             scafdate,
             (
                 SELECT
-                    MAX(contract_start_date)
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_a06m_leases.vw_control_monthly
+                    `revenue-assurance-prod.control_a06m_leases.__TABLES__`
+                WHERE
+                    table_id = 'vw_control_monthly'
             ) AS last_refresh,
             scafmetric,
             'None' AS scafbreakdown,
@@ -91,9 +95,11 @@ WITH
             scafdate,
             (
                 SELECT
-                    MAX(billing_task_completed_on)
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
+                    `revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.__TABLES__`
+                WHERE
+                    table_id = 'ETF_control_pulse_and_sdp_fees_calculated'
             ) AS last_refresh,
             scafmetric,
             'None' AS `Breakdown`,
@@ -143,9 +149,11 @@ WITH
             scafdate,
             (
                 SELECT
-                    MAX(project_implementation_confirmed_date)
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data
+                    `revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.__TABLES__`
+                WHERE
+                    table_id = 'control_monthly_data'
             ) AS last_refresh,
             'Tasks Remaining' AS scafmetric,
             scafbreakdown,
@@ -179,9 +187,11 @@ WITH
             scafdate,
             (
                 SELECT
-                    MAX(ChargeStartDate)
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary
+                    `revenue-assurance-prod.control_f12m_btp_suspense.__TABLES__`
+                WHERE
+                    table_id = 'tableau_summary'
             ) AS last_refresh,
             'Count of Errors' AS scafmetric,
             scafbreakdown,
@@ -199,9 +209,11 @@ WITH
             scafdate,
             (
                 SELECT
-                    MAX(ChargeStartDate)
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.ime_suspense.IME_Tableau_Summary
+                    `revenue-assurance-prod.ime_suspense.__TABLES__`
+                WHERE
+                    table_id = 'IME_Tableau_Summary'
             ) AS last_refresh,
             'Count of Errors' AS scafmetric,
             scafbreakdown,
@@ -220,9 +232,11 @@ WITH
             -- Get the latest date in the table to use for last refresh indicator.
             (
                 SELECT
-                    MAX(ime_ime_file_date)
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_ime_sv.IME_SV_Summary
+                    `revenue-assurance-prod.control_ime_sv.__TABLES__`
+                WHERE
+                    table_id = 'IME_SV_Summary'
             ) AS last_refresh,
             scafmetric,
             scafbreakdown,
@@ -270,9 +284,11 @@ WITH
             -- Get the latest date in the table to use for last refresh indicator.
             (
                 SELECT
-                    MAX(CAST(order_date AS DATE))
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_var_01_leases.monthly_control_output_for_review2
+                    `revenue-assurance-prod.control_var_01_leases.__TABLES__`
+                WHERE
+                    table_id = 'monthly_control_output_for_review2'
             ) AS last_refresh,
             scafmetric,
             scafbreakdown,
@@ -328,9 +344,11 @@ WITH
             scafdate,
             (
                 SELECT
-                    MAX(stopped_confirmed_date)
+                    TIMESTAMP_MILLIS(last_modified_time) AS last_modified
                 FROM
-                    revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels
+                    `revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.__TABLES__`
+                WHERE
+                    table_id = 'control_output_data_temp_stop_vessels'
             ) AS last_refresh,
             'Row Count' AS scafmetric,
             scafbreakdown,
