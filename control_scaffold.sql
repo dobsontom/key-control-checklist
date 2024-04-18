@@ -160,6 +160,18 @@ WITH
                 metric = 'Billed_in_SV_category'
                 AND value = 'Billed in last 3 months'
             )
+        UNION DISTINCT
+        SELECT DISTINCT
+            'X01-B' AS control,
+            'Control Count' AS scafmetric,
+            category1 AS scafbreakdown,
+        FROM
+            revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels
+        WHERE
+            category1 IN (
+                'Review - active temp stop vessel, why billed with original charges',
+                'Review - why billed with suspended charges although they are reactivated'
+            )
     )
 SELECT
     breakdown_scaffold.control,
