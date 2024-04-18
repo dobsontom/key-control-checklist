@@ -1,7 +1,7 @@
 WITH
     a04q_data AS (
         SELECT
-            "A04-Q" AS control,
+            control,
             scaf.scafdate,
             (
                 SELECT
@@ -24,12 +24,13 @@ WITH
         WHERE
             scaf.control = 'A04-Q'
         GROUP BY
+            scaf.control,
             scaf.scafdate,
             scaf.scafbreakdown
     ),
     a06m_data AS (
         SELECT
-            "A06-M" AS control,
+            control,
             scafdate,
             (
                 SELECT
@@ -80,12 +81,13 @@ WITH
         WHERE
             scaf.control = 'A06-M'
         GROUP BY
+            scaf.control,
             scaf.scafdate,
             scaf.scafmetric
     ),
     a17m_data AS (
         SELECT
-            "A17-M" AS `Control`,
+            control,
             scafdate,
             (
                 SELECT
@@ -131,12 +133,13 @@ WITH
         WHERE
             control = 'A17-M'
         GROUP BY
+            scaf.control,
             scaf.scafdate,
             scaf.scafmetric
     ),
     f01m_data AS (
         SELECT
-            "F01-M" AS control,
+            control,
             scafdate,
             (
                 SELECT
@@ -165,13 +168,14 @@ WITH
         WHERE
             control = 'F01-M'
         GROUP BY
+            scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown
     ),
     f12m_data AS (
         SELECT
-            "F12-M" AS control,
+            control,
             scafdate,
             (
                 SELECT
@@ -191,7 +195,7 @@ WITH
     ),
     ime01w_data AS (
         SELECT
-            "IME01-W" AS control,
+            control,
             scafdate,
             (
                 SELECT
@@ -211,7 +215,7 @@ WITH
     ),
     ime02w_data AS (
         SELECT
-            "IME02-W" AS control,
+            control,
             scafdate,
             -- Get the latest date in the table to use for last refresh indicator.
             (
@@ -250,6 +254,7 @@ WITH
         WHERE
             scaf.control = 'IME02-W'
         GROUP BY
+            scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown
