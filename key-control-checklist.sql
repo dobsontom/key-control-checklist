@@ -234,7 +234,11 @@ WITH
             LEFT JOIN (
                 -- Unpivot multiple metrics into a single field that can be used in the unified format.
                 SELECT
-                    *
+                    ime_ime_file_date,
+                    traffic_type,
+                    IME_AcquisitionPortal,
+                    metric,
+                    control_count
                 FROM
                     revenue-assurance-prod.control_ime_sv.IME_SV_Summary UNPIVOT(
                         control_count
@@ -253,6 +257,65 @@ WITH
             AND scaf.scafmetric = ime02w.metric
         WHERE
             scaf.control = 'IME02-W'
+        GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown
+    ),
+    var1_data AS (
+        SELECT
+            control,
+            scafdate,
+            -- Get the latest date in the table to use for last refresh indicator.
+            (
+                SELECT
+                    MAX(CAST(order_date AS DATE))
+                FROM
+                    revenue-assurance-prod.control_var_01_leases.monthly_control_output_for_review2
+            ) AS last_refresh,
+            scafmetric,
+            scafbreakdown,
+            COUNTIF(
+                (
+                    metric = 'category_1'
+                    AND breakdown = 'Review needed?'
+                )
+                OR (
+                    metric = 'Billed_in_SV_category'
+                    AND breakdown = 'Billed in last 3 months'
+                )
+            ) AS control_count
+            -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
+            -- IFNULL(SUM(control_count), 0) AS control_count
+        FROM
+            revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+            -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
+            LEFT JOIN (
+                -- Unpivot multiple metrics into a single field that can be used in the unified format.
+                SELECT
+                    order_date,
+                    metric,
+                    breakdown
+                FROM
+                    revenue-assurance-prod.control_var_01_leases.monthly_control_output_for_review2 UNPIVOT(
+                        breakdown
+                        FOR metric IN (category_1, Billed_in_SV_category)
+                    )
+                WHERE
+                    (
+                        metric = 'category_1'
+                        AND breakdown = 'Review needed?'
+                    )
+                    OR (
+                        metric = 'Billed_in_SV_category'
+                        AND breakdown = 'Billed in last 3 months'
+                    )
+            ) var1 ON scaf.scafdate = CAST(var1.order_date AS DATE)
+            AND scaf.scafmetric = var1.metric
+            AND scaf.scafbreakdown = var1.breakdown
+        WHERE
+            scaf.control = 'VAR-1'
         GROUP BY
             scaf.control,
             scaf.scafdate,
@@ -349,5 +412,10 @@ FROM
                     *
                 FROM
                     ime02w_data
+                UNION ALL
+                SELECT
+                    *
+                FROM
+                    var1_data
             )
     );
