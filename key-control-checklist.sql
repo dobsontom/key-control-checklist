@@ -79,10 +79,7 @@ WITH
             -- Count the number of incidents from the original data source rather than
             -- from the scaffold.
             COUNTIF(
-                a06m.metric IN (
-                    'Null SAP Net Value',
-                    'Vessel is inside committment period'
-                )
+                a06m.metric IN ('Not Billed as Planned', 'Unpriced Lease')
             ) AS control_count
         FROM
             revenue-assurance-prod.key_control_checklist.control_scaffold scaf
@@ -92,14 +89,16 @@ WITH
                 SELECT
                     contract_start_date,
                     IF(
-                        billed_as_expected,
+                        billed_as_expected = TRUE,
                         'Billed as Planned',
                         'Not Billed as Planned'
                     ) AS metric
                 FROM
                     revenue-assurance-prod.control_a06m_leases.vw_control_monthly
                 WHERE
-                    billed_as_expected = TRUE
+                    billed_as_expected = FALSE
+                    AND lease_cancelled = FALSE
+                    AND wholesale_part_of_retail_lease = FALSE
                 UNION ALL
                 SELECT
                     contract_start_date,
@@ -112,6 +111,12 @@ WITH
                     revenue-assurance-prod.control_a06m_leases.vw_control_monthly
                 WHERE
                     lease_contract_number LIKE '%FREE%'
+                    AND lease_cancelled = FALSE
+                    AND wholesale_part_of_retail_lease = FALSE
+                    AND (
+                        contract_value IS NULL
+                        OR contract_value = 0
+                    )
             ) a06m ON scaf.scafdate = CAST(a06m.contract_start_date AS DATE)
             AND scaf.scafmetric = a06m.metric
         WHERE

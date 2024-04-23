@@ -60,7 +60,9 @@ CREATE OR REPLACE TABLE
                                 FROM
                                     revenue-assurance-prod.control_a06m_leases.vw_control_monthly
                                 WHERE
-                                    billed_as_expected = TRUE
+                                    billed_as_expected = FALSE
+                                    AND lease_cancelled = FALSE
+                                    AND wholesale_part_of_retail_lease = FALSE
                                 UNION ALL
                                 SELECT DISTINCT
                                     IF(
@@ -72,6 +74,12 @@ CREATE OR REPLACE TABLE
                                     revenue-assurance-prod.control_a06m_leases.vw_control_monthly
                                 WHERE
                                     lease_contract_number LIKE '%FREE%'
+                                    AND lease_cancelled = FALSE
+                                    AND wholesale_part_of_retail_lease = FALSE
+                                    AND (
+                                        contract_value IS NULL
+                                        OR contract_value = 0
+                                    )
                             )
                     )
                 UNION DISTINCT
