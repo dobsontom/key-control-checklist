@@ -3,8 +3,8 @@ CREATE OR REPLACE TABLE
         WITH
             a02q_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     (
                         SELECT
                             TIMESTAMP_MILLIS(last_modified_time) AS last_modified
@@ -13,10 +13,10 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'vw_project_tasks'
                     ) AS last_refresh,
-                    scafmetric,
-                    scafbreakdown,
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
                     COUNTIF(
-                        category1 IN (
+                        a02q.category1 IN (
                             'Review for charges',
                             'Timing issue - active billing billing task - check in the next control run'
                         )
@@ -26,7 +26,7 @@ CREATE OR REPLACE TABLE
                     LEFT JOIN revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data a02q ON scaf.scafdate = a02q.current_commissioning_confirmed_date
                     AND scaf.scafbreakdown = a02q.category1
                 WHERE
-                    control = 'A02-Q'
+                    scaf.control = 'A02-Q'
                 GROUP BY
                     scaf.control,
                     scaf.scafdate,
@@ -35,7 +35,7 @@ CREATE OR REPLACE TABLE
             ),
             a04q_data AS (
                 SELECT
-                    control,
+                    scaf.control,
                     scaf.scafdate,
                     (
                         SELECT
@@ -45,10 +45,10 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'alteryx_output'
                     ) AS last_refresh,
-                    'Error Count' AS scafmetric,
+                    scaf.scafmetric,
                     scaf.scafbreakdown,
                     COUNTIF(
-                        sap_exception IN (
+                        a04q.sap_exception IN (
                             'Exception, SAP data found but totals mismatch',
                             'SAP data not found'
                         )
@@ -62,12 +62,13 @@ CREATE OR REPLACE TABLE
                 GROUP BY
                     scaf.control,
                     scaf.scafdate,
+                    scaf.scafmetric,
                     scaf.scafbreakdown
             ),
             a06m_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     (
                         SELECT
                             TIMESTAMP_MILLIS(last_modified_time) AS last_modified
@@ -76,8 +77,8 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'dim_lease_history'
                     ) AS last_refresh,
-                    scafmetric,
-                    'None' AS scafbreakdown,
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
                     -- Count the number of incidents from the original data source rather than
                     -- from the scaffold.
                     COUNTIF(
@@ -126,12 +127,13 @@ CREATE OR REPLACE TABLE
                 GROUP BY
                     scaf.control,
                     scaf.scafdate,
-                    scaf.scafmetric
+                    scaf.scafmetric,
+                    scaf.scafbreakdown
             ),
             a17m_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     (
                         SELECT
                             TIMESTAMP_MILLIS(last_modified_time) AS last_modified
@@ -140,8 +142,8 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'vw_project_tasks'
                     ) AS last_refresh,
-                    scafmetric,
-                    'None' AS `Breakdown`,
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
                     -- Count the number of incidents from the original data source rather than
                     -- from the scaffold.
                     COUNTIF(
@@ -176,16 +178,17 @@ CREATE OR REPLACE TABLE
                     ) a17m ON scaf.scafdate = CAST(a17m.billing_task_completed_on AS DATE)
                     AND scaf.scafmetric = a17m.metric
                 WHERE
-                    control = 'A17-M'
+                    scaf.control = 'A17-M'
                 GROUP BY
                     scaf.control,
                     scaf.scafdate,
-                    scaf.scafmetric
+                    scaf.scafmetric,
+                    scaf.scafbreakdown
             ),
             f01m_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     (
                         SELECT
                             TIMESTAMP_MILLIS(last_modified_time) AS last_modified
@@ -194,8 +197,8 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'vw_project_tasks'
                     ) AS last_refresh,
-                    'Tasks Remaining' AS scafmetric,
-                    scafbreakdown,
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
                     COUNT(
                         DISTINCT IF(
                             f01m.billing_status IN (
@@ -213,7 +216,7 @@ CREATE OR REPLACE TABLE
                     LEFT JOIN revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data f01m ON scaf.scafdate = f01m.project_implementation_confirmed_date
                     AND scaf.scafbreakdown = CAST(f01m.project_type AS STRING)
                 WHERE
-                    control = 'F01-M'
+                    scaf.control = 'F01-M'
                 GROUP BY
                     scaf.control,
                     scaf.scafdate,
@@ -222,8 +225,8 @@ CREATE OR REPLACE TABLE
             ),
             f12m_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     (
                         SELECT
                             TIMESTAMP_MILLIS(last_modified_time) AS last_modified
@@ -232,20 +235,20 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'sim_tracker'
                     ) AS last_refresh,
-                    'Count of Errors' AS scafmetric,
-                    scafbreakdown,
-                    IFNULL(CountOfErrors, 0) control_count
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
+                    IFNULL(f12m.CountOfErrors, 0) AS control_count
                 FROM
                     revenue-assurance-prod.key_control_checklist.control_scaffold scaf
                     LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary f12m ON scaf.scafdate = f12m.ChargeStartDate
                     AND scaf.scafbreakdown = CAST(f12m.ErrorMessageID AS STRING)
                 WHERE
-                    control = 'F12-M'
+                    scaf.control = 'F12-M'
             ),
             ime01w_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     (
                         SELECT
                             TIMESTAMP_MILLIS(last_modified_time) AS last_modified
@@ -254,20 +257,20 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'EPS_Suspense'
                     ) AS last_refresh,
-                    'Count of Errors' AS scafmetric,
-                    scafbreakdown,
-                    IFNULL(CountOfErrors, 0) AS control_count
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
+                    IFNULL(ime01w.CountOfErrors, 0) AS control_count
                 FROM
                     revenue-assurance-prod.key_control_checklist.control_scaffold scaf
                     LEFT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary ime01w ON scaf.scafdate = ime01w.ChargeStartDate
                     AND scaf.scafbreakdown = ime01w.ErrorMessageID
                 WHERE
-                    control = 'IME01-W'
+                    scaf.control = 'IME01-W'
             ),
             ime02w_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     -- Get the latest date in the table to use for last refresh indicator.
                     (
                         SELECT
@@ -277,10 +280,10 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'ime_summary'
                     ) AS last_refresh,
-                    scafmetric,
-                    scafbreakdown,
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
                     -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
-                    IFNULL(SUM(control_count), 0) AS control_count,
+                    IFNULL(SUM(ime02w.control_count), 0) AS control_count
                 FROM
                     revenue-assurance-prod.key_control_checklist.control_scaffold scaf
                     -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
@@ -318,8 +321,8 @@ CREATE OR REPLACE TABLE
             ),
             var1_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     -- Get the latest date in the table to use for last refresh indicator.
                     (
                         SELECT
@@ -329,20 +332,19 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'output_var_leases_alteryx_data'
                     ) AS last_refresh,
-                    scafmetric,
-                    scafbreakdown,
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
                     COUNTIF(
                         (
-                            metric = 'category_1'
-                            AND breakdown = 'Review needed?'
+                            var1.metric = 'category_1'
+                            AND var1.breakdown = 'Review needed?'
                         )
                         OR (
-                            metric = 'Billed_in_SV_category'
-                            AND breakdown = 'Billed in last 3 months'
+                            var1.metric = 'Billed_in_SV_category'
+                            AND var1.breakdown = 'Billed in last 3 months'
                         )
                     ) AS control_count
                     -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
-                    -- IFNULL(SUM(control_count), 0) AS control_count
                 FROM
                     revenue-assurance-prod.key_control_checklist.control_scaffold scaf
                     -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
@@ -379,8 +381,8 @@ CREATE OR REPLACE TABLE
             ),
             x01b_data AS (
                 SELECT
-                    control,
-                    scafdate,
+                    scaf.control,
+                    scaf.scafdate,
                     (
                         SELECT
                             TIMESTAMP_MILLIS(last_modified_time) AS last_modified
@@ -389,10 +391,10 @@ CREATE OR REPLACE TABLE
                         WHERE
                             table_id = 'vessel'
                     ) AS last_refresh,
-                    'Row Count' AS scafmetric,
-                    scafbreakdown,
+                    scaf.scafmetric,
+                    scaf.scafbreakdown,
                     COUNTIF(
-                        category1 IN (
+                        x01b.category1 IN (
                             'Review - active temp stop vessel, why billed with original charges',
                             'Review - why billed with suspended charges although they are reactivated'
                         )
@@ -402,23 +404,23 @@ CREATE OR REPLACE TABLE
                     LEFT JOIN revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels x01b ON scaf.scafdate = x01b.stopped_confirmed_date
                     AND scaf.scafbreakdown = CAST(x01b.category1 AS STRING)
                 WHERE
-                    control = 'X01-B'
+                    scaf.control = 'X01-B'
                 GROUP BY
                     scaf.control,
                     scaf.scafdate,
                     scaf.scafmetric,
                     scaf.scafbreakdown
             )
-            -- Select and format only the required fields to create the unified format.
+        -- Select and format only the required fields to create a unified format.
         SELECT
-            control AS `Control`,
-            scafdate AS `Date`,
-            last_refresh AS `Last Refresh`,
-            scafmetric AS `Metric`,
-            scafbreakdown AS `Breakdown`,
-            control_count AS `Control Count`,
-            actual_diff AS `Actual Difference vs Yesterday`,
-            pct_diff `Pct Difference vs Yesterday`
+            control         AS `Control`,
+            scafdate        AS `Date`,
+            last_refresh    AS `Last Refresh`,
+            scafmetric      AS `Metric`,
+            scafbreakdown   AS `Breakdown`,
+            control_count   AS `Control Count`,
+            actual_diff     AS `Actual Change vs Previous Day`,
+            pct_diff        AS `Percent Change vs Previous Day`
         FROM
             (
                 -- Calculate the difference in incidents to the previous day for each control, breakdown, and metric.
