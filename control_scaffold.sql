@@ -15,7 +15,7 @@ CREATE OR REPLACE TABLE
             breakdown_scaffold AS (
                 SELECT DISTINCT
                     'A02-Q' AS control,
-                    'Control Count' AS scafmetric,
+                    'Category 1' AS scafmetric,
                     category1 AS scafbreakdown,
                 FROM
                     revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data
@@ -27,7 +27,7 @@ CREATE OR REPLACE TABLE
                 UNION DISTINCT
                 SELECT DISTINCT
                     'A04-Q' AS control,
-                    'Control Count' AS scafmetric,
+                    'SAP Exception' AS scafmetric,
                     sap_exception AS scafbreakdown,
                 FROM
                     revenue-assurance-prod.control_a04q_rebill.alteryx_output
@@ -132,14 +132,14 @@ CREATE OR REPLACE TABLE
                 UNION DISTINCT
                 SELECT DISTINCT
                     'F12-M' AS control,
-                    'Count of Errors' AS scafmetric,
+                    'ErrorMessageID' AS scafmetric,
                     CAST(ErrorMessageID AS STRING) AS scafbreakdown
                 FROM
                     revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary
                 UNION DISTINCT
                 SELECT DISTINCT
                     'IME01-W' AS control,
-                    'Count of Errors' AS scafmetric,
+                    'ErrorMessageID' AS scafmetric,
                     ErrorMessageID AS scafbreakdown
                 FROM
                     revenue-assurance-prod.ime_suspense.IME_Tableau_Summary
@@ -185,7 +185,7 @@ CREATE OR REPLACE TABLE
                 UNION DISTINCT
                 SELECT DISTINCT
                     'X01-B' AS control,
-                    'Control Count' AS scafmetric,
+                    'Category 1' AS scafmetric,
                     category1 AS scafbreakdown,
                 FROM
                     revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels
