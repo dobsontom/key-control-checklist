@@ -419,7 +419,7 @@ CREATE OR REPLACE TABLE
             scafmetric      AS `Metric`,
             scafbreakdown   AS `Breakdown`,
             control_count   AS `Control Count`,
-            actual_diff     AS `Actual Change vs Previous Day`,
+            absolute_diff   AS `Absolute Change vs Previous Day`,
             pct_diff        AS `Percent Change vs Previous Day`
         FROM
             (
@@ -446,7 +446,7 @@ CREATE OR REPLACE TABLE
                             scafbreakdown
                         ORDER BY
                             scafdate
-                    ) AS actual_diff,
+                    ) AS absolute_diff,
                     SAFE_DIVIDE(
                         control_count - LAG(control_count) OVER (
                             PARTITION BY
