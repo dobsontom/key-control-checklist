@@ -341,7 +341,7 @@ CREATE OR REPLACE TABLE
                         )
                         OR (
                             var1.metric = 'Billed_in_SV_category'
-                            AND var1.breakdown = 'Billed in last 3 months'
+                            AND var1.breakdown = 'HP - billed in last 3 months'
                         )
                     ) AS control_count
                     -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
@@ -366,7 +366,7 @@ CREATE OR REPLACE TABLE
                             )
                             OR (
                                 metric = 'Billed_in_SV_category'
-                                AND breakdown = 'Billed in last 3 months'
+                                AND breakdown = 'HP - billed in last 3 months'
                             )
                     ) var1 ON scaf.scafdate = CAST(var1.order_date AS DATE)
                     AND scaf.scafmetric = var1.metric

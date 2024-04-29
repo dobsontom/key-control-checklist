@@ -180,7 +180,7 @@ CREATE OR REPLACE TABLE
                     )
                     OR (
                         metric = 'Billed_in_SV_category'
-                        AND value = 'Billed in last 3 months'
+                        AND value = 'HP - billed in last 3 months'
                     )
                 UNION DISTINCT
                 SELECT DISTINCT
