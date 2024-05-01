@@ -1,3 +1,21 @@
+/*-------------------------------------------------------------------------------------*
+   | Name:      refresh_unified_controls_daily                                          |
+   | Author:    Tom Dobson (The Information Lab)                                        |
+   | Date:      30-04-2024                                                              |
+   |------------------------------------------------------------------------------------|
+   | Purpose:   This script calculates the incident frequency for the last five days    |
+   |            for controls tracked in Revenue Assurance's Key Control Checklist.      |
+   |            Each control's data is joined to a scaffold (control_scaffold) to       |
+   |            ensure that days without any incidents have a row with zero ocurrences  |
+   |            rather than no data, enabling day-to-day comparisons. The data for      |
+   |            each control is minimised, combined into a unified structure, and       |
+   |            stored in the table 'unified_controls', which feeds the Key Control     |
+   |            Checklist Dashboard.                                                    |
+   |------------------------------------------------------------------------------------|
+   | Modifications:                                                                     |
+   *-------------------------------------------------------------------------------------
+*/
+
 CREATE OR REPLACE TABLE
     revenue-assurance-prod.key_control_checklist.unified_controls AS (
         WITH
