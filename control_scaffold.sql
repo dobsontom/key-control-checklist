@@ -21,8 +21,8 @@ CREATE OR REPLACE TABLE
             FROM
                UNNEST (
                   GENERATE_DATE_ARRAY(
-                     DATE_ADD(CURRENT_DATE, INTERVAL - 5 DAY),
-                     DATE_ADD(CURRENT_DATE, INTERVAL - 1 DAY)
+                     DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY),
+                     DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)
                   )
                ) AS scafdate
          ),
