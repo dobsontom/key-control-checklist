@@ -86,9 +86,9 @@ CREATE OR REPLACE TABLE
          ),
          a02q_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -105,6 +105,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'A02-Q'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
@@ -112,9 +113,9 @@ CREATE OR REPLACE TABLE
          ),
          a04q_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -131,6 +132,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'A04-Q'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
@@ -138,9 +140,9 @@ CREATE OR REPLACE TABLE
          ),
          a06m_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                -- Count the number of incidents from the original data source rather than
@@ -190,6 +192,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'A06-M'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
@@ -197,9 +200,9 @@ CREATE OR REPLACE TABLE
          ),
          a17m_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                -- Count the number of incidents from the original data source rather than
@@ -239,6 +242,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'A17-M'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
@@ -246,9 +250,9 @@ CREATE OR REPLACE TABLE
          ),
          f01m_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNT(
@@ -271,6 +275,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'F01-M'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
@@ -278,9 +283,9 @@ CREATE OR REPLACE TABLE
          ),
          f12m_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                IFNULL(f12m.CountOfErrors, 0) AS control_count
@@ -294,9 +299,9 @@ CREATE OR REPLACE TABLE
          ),
          ime01w_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                IFNULL(ime01w.CountOfErrors, 0) AS control_count
@@ -310,9 +315,9 @@ CREATE OR REPLACE TABLE
          ),
          ime02w_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
@@ -348,6 +353,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'IME02-W'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
@@ -355,9 +361,9 @@ CREATE OR REPLACE TABLE
          ),
          var1_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -400,6 +406,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'VAR-1'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
@@ -407,9 +414,9 @@ CREATE OR REPLACE TABLE
          ),
          x01b_data AS (
             SELECT
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
-               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -426,6 +433,7 @@ CREATE OR REPLACE TABLE
             WHERE
                scaf.control = 'X01-B'
             GROUP BY
+               lr.last_refresh,
                scaf.control,
                scaf.scafdate,
                scaf.scafmetric,
