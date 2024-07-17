@@ -31,7 +31,7 @@ CREATE OR REPLACE TABLE
                 SELECT DISTINCT
                     'A02-Q' AS control,
                     'Category 1' AS scafmetric,
-                    category1 AS scafbreakdown,
+                    category1 AS scafbreakdown
                 FROM
                     revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data
                 WHERE
@@ -43,7 +43,7 @@ CREATE OR REPLACE TABLE
                 SELECT DISTINCT
                     'A04-Q' AS control,
                     'SAP Exception' AS scafmetric,
-                    sap_exception AS scafbreakdown,
+                    sap_exception AS scafbreakdown
                 FROM
                     revenue-assurance-prod.control_a04q_rebill.alteryx_output
                 WHERE
@@ -55,44 +55,39 @@ CREATE OR REPLACE TABLE
                 SELECT DISTINCT
                     'A06-M' AS control,
                     metric AS scafmetric,
-                    'None' AS scafbreakdown,
+                    'None' AS scafbreakdown
                 FROM
                     (
-                        SELECT
-                            metric
-                            -- Need to create unified metric column via union rather than unpivot, as can't unpivot
-                            -- fields with different data types into the same field.
+                        -- Need to create unified metric column via union rather than unpivot, as can't unpivot
+                        -- fields with different data types into the same field.
+                        SELECT DISTINCT
+                            IF(
+                                billed_as_expected = TRUE,
+                                'Billed as Planned',
+                                'Not Billed as Planned'
+                            ) AS metric
                         FROM
-                            (
-                                SELECT DISTINCT
-                                    IF(
-                                        billed_as_expected = TRUE,
-                                        'Billed as Planned',
-                                        'Not Billed as Planned'
-                                    ) AS metric
-                                FROM
-                                    revenue-assurance-prod.control_a06m_leases.vw_control_monthly
-                                WHERE
-                                    billed_as_expected = FALSE
-                                    AND lease_cancelled = FALSE
-                                    AND wholesale_part_of_retail_lease = FALSE
-                                UNION ALL
-                                SELECT DISTINCT
-                                    IF(
-                                        lease_contract_number LIKE '%FREE%',
-                                        'Unpriced Lease',
-                                        'Priced Lease'
-                                    ) AS metric
-                                FROM
-                                    revenue-assurance-prod.control_a06m_leases.vw_control_monthly
-                                WHERE
-                                    lease_contract_number LIKE '%FREE%'
-                                    AND lease_cancelled = FALSE
-                                    AND wholesale_part_of_retail_lease = FALSE
-                                    AND (
-                                        contract_value IS NULL
-                                        OR contract_value = 0
-                                    )
+                            revenue-assurance-prod.control_a06m_leases.vw_control_monthly
+                        WHERE
+                            billed_as_expected = FALSE
+                            AND lease_cancelled = FALSE
+                            AND wholesale_part_of_retail_lease = FALSE
+                        UNION ALL
+                        SELECT DISTINCT
+                            IF(
+                                lease_contract_number LIKE '%FREE%',
+                                'Unpriced Lease',
+                                'Priced Lease'
+                            ) AS metric
+                        FROM
+                            revenue-assurance-prod.control_a06m_leases.vw_control_monthly
+                        WHERE
+                            lease_contract_number LIKE '%FREE%'
+                            AND lease_cancelled = FALSE
+                            AND wholesale_part_of_retail_lease = FALSE
+                            AND (
+                                contract_value IS NULL
+                                OR contract_value = 0
                             )
                     )
                 UNION DISTINCT
@@ -104,29 +99,24 @@ CREATE OR REPLACE TABLE
                     'None' AS scafbreakdown
                 FROM
                     (
-                        SELECT
-                            metric
-                            -- Need to create unified metric column via unions rather than unpivot, as can't unpivot
-                            -- fields with different data types, even when casting as string.
+                        -- Need to create unified metric column via unions rather than unpivot, as can't unpivot
+                        -- fields with different data types, even when casting as string.
+                        SELECT DISTINCT
+                            IFNULL(
+                                CAST(sap_net_value AS STRING),
+                                'Null SAP Net Value'
+                            ) AS metric
                         FROM
-                            (
-                                SELECT DISTINCT
-                                    IFNULL(
-                                        CAST(sap_net_value AS STRING),
-                                        'Null SAP Net Value'
-                                    ) AS metric
-                                FROM
-                                    revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
-                                WHERE
-                                    sap_net_value IS NULL
-                                UNION ALL
-                                SELECT DISTINCT
-                                    is_vessel_ooc AS metric
-                                FROM
-                                    revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
-                                WHERE
-                                    is_vessel_ooc = 'Vessel is inside committment period'
-                            )
+                            revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
+                        WHERE
+                            sap_net_value IS NULL
+                        UNION ALL
+                        SELECT DISTINCT
+                            is_vessel_ooc AS metric
+                        FROM
+                            revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
+                        WHERE
+                            is_vessel_ooc = 'Vessel is inside committment period'
                     )
                 UNION DISTINCT
                 SELECT DISTINCT
@@ -198,7 +188,7 @@ CREATE OR REPLACE TABLE
                 SELECT DISTINCT
                     'X01-B' AS control,
                     'Category 1' AS scafmetric,
-                    category1 AS scafbreakdown,
+                    category1 AS scafbreakdown
                 FROM
                     revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels
                 WHERE
