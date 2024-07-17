@@ -1,5 +1,5 @@
 /*-----------------------------------------------------------------------------------*
-| Name:      refresh_unified_controls_daily                                          |
+| Name:      refresh_unified_controls_every_six_hours                                |
 | Author:    Tom Dobson (The Information Lab)                                        |
 | Date:      30-04-2024                                                              |
 |------------------------------------------------------------------------------------|
