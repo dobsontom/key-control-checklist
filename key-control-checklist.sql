@@ -16,19 +16,79 @@
 '-----------------------------------------------------------------------------------*/
 CREATE OR REPLACE TABLE
    revenue-assurance-prod.key_control_checklist.unified_controls AS (
+      -- Fetches the last modified time from the metadata of 
+      -- the parent table of each control.
       WITH
+         last_refresh_times AS (
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.pulse.__TABLES__`
+            WHERE
+               table_id = 'vw_project_tasks'
+            UNION ALL
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.control_a04q_rebill.__TABLES__`
+            WHERE
+               table_id = 'alteryx_output'
+            UNION ALL
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.control_a06m_leases.__TABLES__`
+            WHERE
+               table_id = 'dim_lease_history'
+            UNION ALL
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.control_f12m_btp_suspense.__TABLES__`
+            WHERE
+               table_id = 'sim_tracker'
+            UNION ALL
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.ime_suspense.__TABLES__`
+            WHERE
+               table_id = 'EPS_Suspense'
+            UNION ALL
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.control_ime_sv.__TABLES__`
+            WHERE
+               table_id = 'ime_summary'
+            UNION ALL
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.control_var_01_leases.__TABLES__`
+            WHERE
+               table_id = 'output_var_leases_alteryx_data'
+            UNION ALL
+            SELECT
+               table_id,
+               TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            FROM
+               `revenue-assurance-prod.pulse_src.__TABLES__`
+            WHERE
+               table_id = 'vessel'
+         ),
          a02q_data AS (
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.pulse.__TABLES__`
-                  WHERE
-                     table_id = 'vw_project_tasks'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -39,6 +99,7 @@ CREATE OR REPLACE TABLE
                ) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
                LEFT JOIN revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data a02q ON scaf.scafdate = a02q.current_commissioning_confirmed_date
                AND scaf.scafbreakdown = a02q.category1
             WHERE
@@ -53,14 +114,7 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.control_a04q_rebill.__TABLES__`
-                  WHERE
-                     table_id = 'alteryx_output'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -71,6 +125,7 @@ CREATE OR REPLACE TABLE
                ) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'alteryx_output'
                LEFT JOIN revenue-assurance-prod.control_a04q_rebill.alteryx_output a04q ON scaf.scafdate = CAST(a04q.crc_created_on AS DATE)
                AND scaf.scafbreakdown = a04q.sap_exception
             WHERE
@@ -85,14 +140,7 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.control_a06m_leases.__TABLES__`
-                  WHERE
-                     table_id = 'dim_lease_history'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                -- Count the number of incidents from the original data source rather than
@@ -102,6 +150,7 @@ CREATE OR REPLACE TABLE
                ) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'dim_lease_history'
                LEFT JOIN (
                   -- Union the two metrics into a single field and perform a left join to the scaffold
                   -- to get a row for every day and for every metric.
@@ -150,14 +199,7 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.pulse.__TABLES__`
-                  WHERE
-                     table_id = 'vw_project_tasks'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                -- Count the number of incidents from the original data source rather than
@@ -170,6 +212,7 @@ CREATE OR REPLACE TABLE
                ) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
                LEFT JOIN (
                   -- Union the two metrics into a single field and perform a left join to the scaffold
                   -- to get a row for every day and for every metric.
@@ -205,14 +248,7 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.pulse.__TABLES__`
-                  WHERE
-                     table_id = 'vw_project_tasks'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNT(
@@ -229,6 +265,7 @@ CREATE OR REPLACE TABLE
                ) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
                LEFT JOIN revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data f01m ON scaf.scafdate = f01m.project_implementation_confirmed_date
                AND scaf.scafbreakdown = CAST(f01m.project_type AS STRING)
             WHERE
@@ -243,19 +280,13 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.control_f12m_btp_suspense.__TABLES__`
-                  WHERE
-                     table_id = 'sim_tracker'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                IFNULL(f12m.CountOfErrors, 0) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'sim_tracker'
                LEFT JOIN revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary f12m ON scaf.scafdate = f12m.ChargeStartDate
                AND scaf.scafbreakdown = CAST(f12m.ErrorMessageID AS STRING)
             WHERE
@@ -265,19 +296,13 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.ime_suspense.__TABLES__`
-                  WHERE
-                     table_id = 'EPS_Suspense'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                IFNULL(ime01w.CountOfErrors, 0) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'EPS_Suspense'
                LEFT JOIN revenue-assurance-prod.ime_suspense.IME_Tableau_Summary ime01w ON scaf.scafdate = ime01w.ChargeStartDate
                AND scaf.scafbreakdown = ime01w.ErrorMessageID
             WHERE
@@ -287,21 +312,14 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               -- Get the latest date in the table to use for last refresh indicator.
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.control_ime_sv.__TABLES__`
-                  WHERE
-                     table_id = 'ime_summary'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
                IFNULL(SUM(ime02w.control_count), 0) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'ime_summary'
                -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
                LEFT JOIN (
                   -- Unpivot multiple metrics into a single field that can be used in the unified format.
@@ -339,15 +357,7 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               -- Get the latest date in the table to use for last refresh indicator.
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.control_var_01_leases.__TABLES__`
-                  WHERE
-                     table_id = 'output_var_leases_alteryx_data'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -360,9 +370,9 @@ CREATE OR REPLACE TABLE
                      AND var1.breakdown = 'HP - billed in last 3 months'
                   )
                ) AS control_count
-               -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_var_leases_alteryx_data'
                -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
                LEFT JOIN (
                   -- Unpivot multiple metrics into a single field that can be used in the unified format.
@@ -399,14 +409,7 @@ CREATE OR REPLACE TABLE
             SELECT
                scaf.control,
                scaf.scafdate,
-               (
-                  SELECT
-                     TIMESTAMP_MILLIS(last_modified_time) AS last_modified
-                  FROM
-                     `revenue-assurance-prod.pulse_src.__TABLES__`
-                  WHERE
-                     table_id = 'vessel'
-               ) AS last_refresh,
+               lr.last_refresh,
                scaf.scafmetric,
                scaf.scafbreakdown,
                COUNTIF(
@@ -417,6 +420,7 @@ CREATE OR REPLACE TABLE
                ) AS control_count
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
+               LEFT JOIN last_refresh_times lr ON lr.table_id = 'vessel'
                LEFT JOIN revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels x01b ON scaf.scafdate = x01b.stopped_confirmed_date
                AND scaf.scafbreakdown = CAST(x01b.category1 AS STRING)
             WHERE
