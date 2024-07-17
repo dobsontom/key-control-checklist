@@ -57,8 +57,7 @@ CREATE OR REPLACE TABLE
                     metric AS scafmetric,
                     'None' AS scafbreakdown,
                 FROM
-                    revenue-assurance-prod.control_a06m_leases.vw_control_monthly
-                    CROSS JOIN (
+                    (
                         SELECT
                             metric
                             -- Need to create unified metric column via union rather than unpivot, as can't unpivot
@@ -104,8 +103,7 @@ CREATE OR REPLACE TABLE
                     metric AS scafmetric,
                     'None' AS scafbreakdown
                 FROM
-                    revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated
-                    CROSS JOIN (
+                    (
                         SELECT
                             metric
                             -- Need to create unified metric column via unions rather than unpivot, as can't unpivot
