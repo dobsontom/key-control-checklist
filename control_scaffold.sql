@@ -50,8 +50,7 @@ CREATE OR REPLACE TABLE
                 WHERE
                     sap_exception IN (
                         'Exception, SAP data found but totals mismatch',
-                        'SAP data not found',
-                        'No SAP Exceptions'
+                        'SAP data not found'
                     )
                 UNION DISTINCT
                 SELECT DISTINCT
