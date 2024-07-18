@@ -145,8 +145,6 @@ CREATE OR REPLACE TABLE
                scaf.scafdate,
                scaf.scafmetric,
                scaf.scafbreakdown,
-               -- Count the number of incidents from the original data source rather than
-               -- from the scaffold.
                COUNTIF(
                   a06m.metric IN ('Not Billed as Planned', 'Unpriced Lease')
                ) AS control_count
@@ -205,8 +203,6 @@ CREATE OR REPLACE TABLE
                scaf.scafdate,
                scaf.scafmetric,
                scaf.scafbreakdown,
-               -- Count the number of incidents from the original data source rather than
-               -- from the scaffold.
                COUNTIF(
                   a17m.metric IN (
                      'Null SAP Net Value',
@@ -325,9 +321,9 @@ CREATE OR REPLACE TABLE
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
                LEFT JOIN last_refresh_times lr ON lr.table_id = 'ime_summary'
-               -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
+               -- Left join main data to the scaffold create rows for any missing day/indicent type combinations.
                LEFT JOIN (
-                  -- Unpivot multiple metrics into a single field that can be used in the unified format.
+                  -- Unpivot multiple metrics into a single field.
                   SELECT
                      ime_ime_file_date,
                      traffic_type,
@@ -379,9 +375,9 @@ CREATE OR REPLACE TABLE
             FROM
                revenue-assurance-prod.key_control_checklist.control_scaffold scaf
                LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_var_leases_alteryx_data'
-               -- Left join main data to the scaffold to bring in any days/control combinations missing from the data.
+               -- Left join main data to the scaffold create rows for any missing day/indicent type combinations.
                LEFT JOIN (
-                  -- Unpivot multiple metrics into a single field that can be used in the unified format.
+                  -- Unpivot multiple metrics into a single field.
                   SELECT
                      order_date,
                      metric,
@@ -439,7 +435,6 @@ CREATE OR REPLACE TABLE
                scaf.scafmetric,
                scaf.scafbreakdown
          )
-         -- Select and format only the required fields to create a unified format.
       SELECT
          control AS `Control`,
          scafdate AS `Date`,
@@ -451,7 +446,7 @@ CREATE OR REPLACE TABLE
          pct_diff AS `Percent Change vs Previous Day`
       FROM
          (
-            -- Calculate the difference in incidents to the previous day for each control, breakdown, and metric.
+            -- Calculate the change in frequence of incidents to the previous day for each metric and breakdown.
             SELECT
                control,
                scafdate,
