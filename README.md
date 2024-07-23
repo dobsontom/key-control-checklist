@@ -3,14 +3,6 @@
 ## Overview
 This repository contains scheduled SQL queries used by the Revenue Assurance team to monitor and report the daily frequency of various incident types (controls). The scripts generate and refresh a scaffold table and a unified controls table to ensure consistent day-to-day comparisons. The data is subsequently visualised in a Tableau dashboard.
 
-## Repository Structure
-
-- `queries/`
-  - `refresh_control_scaffold_daily.sql`
-  - `refresh_unified_controls_every_six_hours.sql`
-- `docs/`
-  - `documentation.md`
-
 ## Scheduled Queries
 
 | Query                                | Schedule                                           |
