@@ -6,7 +6,7 @@
 | Purpose:   This script calculates the incident frequency for the last five days    |
 |            for controls tracked in Revenue Assurance's Key Control Checklist.      |
 |            Each control's data is joined to a scaffold (control_scaffold) to       |
-|            ensure that days without any incidents have a row with zero ocurrences  |
+|            ensure that days without any incidents have a row with zero occurrences |
 |            rather than no data, enabling day-to-day comparisons. The data for      |
 |            each control is minimised, combined into a unified structure, and       |
 |            stored in the table 'unified_controls', which feeds the Key Control     |
