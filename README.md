@@ -71,3 +71,5 @@ The last refresh time for each control is obtained from the closest parent table
    - Add parameters and calculations for the new control.
    - Duplicate existing sheets and update filters for the new control.
    - Add new control to the dashboard.
+
+---
