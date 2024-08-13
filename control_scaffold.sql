@@ -10,7 +10,7 @@
 |            row with zero ocurrences rather than no data, enabling                  |
 |            day-to-day comparisons.                                                 |
 '-----------------------------------------------------------------------------------*/
-CREATE OR REPLACE TABLE revenue-assurance-prod.key_control_checklist.control_scaffold AS (
+CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_scaffold` AS (
    WITH
       date_scaffold AS (
          SELECT
