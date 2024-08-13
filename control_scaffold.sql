@@ -158,23 +158,24 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'GX4-JX' AS control,
             'DAL vs BTP Usage by SSPC' AS scafmetric,
             'Difference Greater than 2.5%' AS scafbreakdown
-         FROM
-            `revenue-assurance-prod.control_gx4.output_control_outcomes`
-         WHERE
-            -- Conditions included for reference
-            control_group = 'Usage'
-            AND control_name = 'DAL vs BTP Usage by SSPC'
-            AND exception_type = 'Difference greater than 2.5%'
+         -- Table and conditions added for reference
+         -- FROM
+         --    `revenue-assurance-prod.control_gx4.output_control_outcomes`
+         -- WHERE
+         --    control_group = 'Usage'
+         --    AND control_name = 'DAL vs BTP Usage by SSPC'
+         --    AND exception_type = 'Difference greater than 2.5%'
          UNION ALL
          SELECT
             'FC01-Q' AS control,
             'pulse_vs_nuda_category_1' AS scafmetric,
             'Review needed - no charges matching with Vessel ID' AS scafbreakdown
-         FROM
-            `revenue-assurance-prod.control_fc01_fleet_care_review.control_monthly_data_fc01`
-         WHERE
-            -- Conditions included for reference
-            pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
+         -- Table and conditions added for reference
+         -- FROM
+         --    `revenue-assurance-prod.control_fc01_fleet_care_review.control_monthly_data_fc01`
+         -- WHERE
+         --    -- Conditions included for reference
+         --    pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
       )
    SELECT
       b.control,
