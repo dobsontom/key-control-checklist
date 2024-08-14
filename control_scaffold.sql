@@ -9,6 +9,7 @@
  *           controls tracked in Revenue Assurance's Key Control Checklist. 
  *           This ensures that days without any incidents have a row with zero 
  *           occurrences rather than no data, enabling day-to-day comparisons.
+ * Docs:     https://bit.ly/key-control-docs
  *===============================================================================
  */
 CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_scaffold` AS (

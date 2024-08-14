@@ -12,6 +12,7 @@
  *           The data for each control is minimized, combined into a unified 
  *           structure, and stored in the table 'unified_controls', which feeds 
  *           the Key Control Checklist Dashboard.
+ * Docs:     https://bit.ly/key-control-docs
  *===============================================================================
  */
 CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_controls` AS (
