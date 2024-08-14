@@ -411,9 +411,32 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01 ON scaf.scafdate = DATE(fc01.commissioning_confirm_date)
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_control_outcomes'
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'fc01q_extract'
          WHERE
             scaf.control = 'FC01-Q'
+         GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            lr.last_refresh
+      ),
+      chv_data AS (
+         SELECT
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            COUNTIF(
+               chv.check_for_Charterer_plan_billied = 'Review for charges - Not found in billing'
+            ) AS control_count,
+            lr.last_refresh
+         FROM
+            control_scaffold scaf
+            LEFT JOIN `revenue-assurance-prod.key_control_checklist.chv_extract` chv ON scaf.scafdate = DATE(chv.charterer_start_date)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'chv_extract'
+         WHERE
+            scaf.control = 'CH-V'
          GROUP BY
             scaf.control,
             scaf.scafdate,
@@ -480,6 +503,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             *
          FROM
             fc01_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            chv_data
       ),
       calculated_data AS (
          SELECT
