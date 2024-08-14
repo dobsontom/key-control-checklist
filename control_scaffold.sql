@@ -158,24 +158,54 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'GX4-JX' AS control,
             'DAL vs BTP Usage by SSPC' AS scafmetric,
             'Difference Greater than 2.5%' AS scafbreakdown
-         -- Table and conditions added for reference
-         -- FROM
-         --    `revenue-assurance-prod.control_gx4.output_control_outcomes`
-         -- WHERE
-         --    control_group = 'Usage'
-         --    AND control_name = 'DAL vs BTP Usage by SSPC'
-         --    AND exception_type = 'Difference greater than 2.5%'
+            -- Table and conditions added for reference
+            -- FROM
+            --    `revenue-assurance-prod.control_gx4.output_control_outcomes`
+            -- WHERE
+            --    control_group = 'Usage'
+            --    AND control_name = 'DAL vs BTP Usage by SSPC'
+            --    AND exception_type = 'Difference greater than 2.5%'
          UNION ALL
          SELECT
             'FC01-Q' AS control,
             'pulse_vs_nuda_category_1' AS scafmetric,
             'Review needed - no charges matching with Vessel ID' AS scafbreakdown
-         -- Table and conditions added for reference
-         -- FROM
-         --    `revenue-assurance-prod.control_fc01_fleet_care_review.control_monthly_data_fc01`
-         -- WHERE
-         --    -- Conditions included for reference
-         --    pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
+            -- Table and conditions for reference
+            -- FROM
+            --    `revenue-assurance-prod.control_fc01_fleet_care_review.control_monthly_data_fc01`
+            -- WHERE
+            --    -- Conditions included for reference
+            --    pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
+         UNION ALL
+         SELECT
+            'CH-V' AS control,
+            'check_for_Charterer_plan_billied' AS scafmetric,
+            'Review for charges - Not found in billing' AS scafbreakdown
+            -- Table and conditions for reference
+            -- FROM
+            --    `revenue-assurance-prod.control_fx_charterer_vessels.ch_v_charterer_vessels_control_data`
+            -- WHERE
+            --    check_for_Charterer_plan_billied = 'Review for charges - Not found in billing'
+         UNION ALL
+         SELECT
+            'A15-Q' AS control,
+            'Billing task completed on' AS scafmetric,
+            'This month' AS scafbreakdown
+            -- Table and conditions for reference
+            --       FROM
+            --          `revenue-assurance-prod.control_a15_q_fx_new_install_and_upgrade_pricing_review.a15_q_control_monthly_data`
+            --       WHERE
+            --          DATE_TRUNC(billing_task_completed_on, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
+         UNION ALL
+         SELECT
+            'E05-W' AS control,
+            'Review Required' AS scafmetric,
+            'Review' AS scafbreakdown
+            -- Table and conditions for reference
+            --       FROM
+            --          `revenue-assurance-prod.control_e05w.output_data`
+            --       WHERE
+            --          review_required = 'review'
       )
    SELECT
       b.control,
