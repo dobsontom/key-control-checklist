@@ -87,16 +87,16 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
    FROM
       `revenue-assurance-prod.key_control_checklist.__TABLES__`
    WHERE
-      table_id = 'fc01q_extract.'
+      table_id = 'fc01q_extract'
    UNION ALL
    -- Last refresh source for: CH-V
    SELECT
       table_id,
       TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
    FROM
-      `revenue-assurance-prod.control_fx_charterer_vessels.__TABLES__`
+      `revenue-assurance-prod.key_control_checklist.__TABLES__`
    WHERE
-      table_id = 'ch_v_charterer_vessels_control_data'
+      table_id = 'chv_extract'
    UNION ALL
    -- Last refresh source for: A15-Q
    SELECT
