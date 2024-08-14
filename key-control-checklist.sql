@@ -609,7 +609,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       control_count AS `Control Count`,
       absolute_diff AS `Absolute Change vs Previous Day`,
       pct_diff AS `Percent Change vs Previous Day`,
-      last_refresh AS `Last Refresh`,
+      last_refresh AS `Last Refresh`
    FROM
       calculated_data
 );
