@@ -28,7 +28,6 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       ),
       a02q_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
@@ -38,24 +37,24 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   'Review for charges',
                   'Timing issue - active billing billing task - check in the next control run'
                )
-            ) AS control_count
+            ) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
             LEFT JOIN `revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data` a02q ON scaf.scafdate = a02q.current_commissioning_confirmed_date
             AND scaf.scafbreakdown = a02q.category1
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
          WHERE
             scaf.control = 'A02-Q'
          GROUP BY
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
-            scaf.scafbreakdown
+            scaf.scafbreakdown,
+            lr.last_refresh
       ),
       a04q_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
@@ -65,34 +64,34 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   'Exception, SAP data found but totals mismatch',
                   'SAP data not found'
                )
-            ) AS control_count
+            ) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'alteryx_output'
             LEFT JOIN `revenue-assurance-prod.control_a04q_rebill.alteryx_output` a04q ON scaf.scafdate = CAST(a04q.crc_created_on AS DATE)
             AND scaf.scafbreakdown = a04q.sap_exception
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'alteryx_output'
          WHERE
             scaf.control = 'A04-Q'
          GROUP BY
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
-            scaf.scafbreakdown
+            scaf.scafbreakdown,
+            lr.last_refresh
       ),
       a06m_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
             COUNTIF(
                a06m.metric IN ('Not Billed as Planned', 'Unpriced Lease')
-            ) AS control_count
+            ) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'dim_lease_history'
             LEFT JOIN (
                -- Union the two metrics into a single field.
                SELECT
@@ -128,18 +127,18 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   )
             ) a06m ON scaf.scafdate = CAST(a06m.contract_start_date AS DATE)
             AND scaf.scafmetric = a06m.metric
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'dim_lease_history'
          WHERE
             scaf.control = 'A06-M'
          GROUP BY
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
-            scaf.scafbreakdown
+            scaf.scafbreakdown,
+            lr.last_refresh
       ),
       a17m_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
@@ -149,10 +148,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   'Null SAP Net Value',
                   'Vessel is inside committment period'
                )
-            ) AS control_count
+            ) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
             LEFT JOIN (
                -- Union the two metrics into a single field.
                SELECT
@@ -175,18 +174,18 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   is_vessel_ooc = 'Vessel is inside committment period'
             ) a17m ON scaf.scafdate = CAST(a17m.billing_task_completed_on AS DATE)
             AND scaf.scafmetric = a17m.metric
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
          WHERE
             scaf.control = 'A17-M'
          GROUP BY
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
-            scaf.scafbreakdown
+            scaf.scafbreakdown,
+            lr.last_refresh
       ),
       f01m_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
@@ -202,65 +201,65 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   project_task_order,
                   NULL
                )
-            ) AS control_count
+            ) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
             LEFT JOIN `revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data` f01m ON scaf.scafdate = f01m.project_implementation_confirmed_date
             AND scaf.scafbreakdown = CAST(f01m.project_type AS STRING)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
          WHERE
             scaf.control = 'F01-M'
          GROUP BY
-            lr.last_refresh,
-            scaf.control,
-            scaf.scafdate,
-            scaf.scafmetric,
-            scaf.scafbreakdown
-      ),
-      f12m_data AS (
-         SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            IFNULL(f12m.CountOfErrors, 0) AS control_count
+            lr.last_refresh
+      ),
+      f12m_data AS (
+         SELECT
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            IFNULL(f12m.CountOfErrors, 0) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'sim_tracker'
             LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` f12m ON scaf.scafdate = f12m.ChargeStartDate
             AND scaf.scafbreakdown = CAST(f12m.ErrorMessageID AS STRING)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'sim_tracker'
          WHERE
             scaf.control = 'F12-M'
       ),
       ime01w_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            IFNULL(ime01w.CountOfErrors, 0) AS control_count
+            IFNULL(ime01w.CountOfErrors, 0) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'EPS_Suspense'
             LEFT JOIN `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary` ime01w ON scaf.scafdate = ime01w.ChargeStartDate
             AND scaf.scafbreakdown = ime01w.ErrorMessageID
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'EPS_Suspense'
          WHERE
             scaf.control = 'IME01-W'
       ),
       ime02w_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
             -- If the count of incidents is null due to being missing from the data replace with zero.
-            IFNULL(SUM(ime02w.control_count), 0) AS control_count
+            IFNULL(SUM(ime02w.control_count), 0) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'ime_summary'
             -- Unpivot multiple metrics into a single field.
             LEFT JOIN (
                SELECT
@@ -285,18 +284,18 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                ime02w.IME_AcquisitionPortal
             )
             AND scaf.scafmetric = ime02w.metric
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'ime_summary'
          WHERE
             scaf.control = 'IME02-W'
          GROUP BY
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
-            scaf.scafbreakdown
+            scaf.scafbreakdown,
+            lr.last_refresh
       ),
       var1_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
@@ -310,10 +309,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   var1.metric = 'Billed_in_SV_category'
                   AND var1.breakdown = 'HP - billed in last 3 months'
                )
-            ) AS control_count
+            ) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_var_leases_alteryx_data'
             LEFT JOIN (
                -- Unpivot multiple metrics into a single field.
                SELECT
@@ -337,18 +336,18 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             ) var1 ON scaf.scafdate = CAST(var1.order_date AS DATE)
             AND scaf.scafmetric = var1.metric
             AND scaf.scafbreakdown = var1.breakdown
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_var_leases_alteryx_data'
          WHERE
             scaf.control = 'VAR-1'
          GROUP BY
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
-            scaf.scafbreakdown
+            scaf.scafbreakdown,
+            lr.last_refresh
       ),
       x01b_data AS (
          SELECT
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
@@ -358,37 +357,77 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   'Review - active temp stop vessel, why billed with original charges',
                   'Review - why billed with suspended charges although they are reactivated'
                )
-            ) AS control_count
+            ) AS control_count,
+            lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vessel'
             LEFT JOIN `revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels` x01b ON scaf.scafdate = x01b.stopped_confirmed_date
             AND scaf.scafbreakdown = CAST(x01b.category1 AS STRING)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vessel'
          WHERE
             scaf.control = 'X01-B'
          GROUP BY
-            lr.last_refresh,
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
-            scaf.scafbreakdown
-      )
-   SELECT
-      control AS `Control`,
-      scafdate AS `Date`,
-      last_refresh AS `Last Refresh`,
-      scafmetric AS `Metric`,
-      scafbreakdown AS `Breakdown`,
-      control_count AS `Control Count`,
-      absolute_diff AS `Absolute Change vs Previous Day`,
-      pct_diff AS `Percent Change vs Previous Day`
-   FROM
-      (
-         -- Calculate the daily frequency change.
+            scaf.scafbreakdown,
+            lr.last_refresh
+      ),
+      combined_data AS (
+         SELECT
+            *
+         FROM
+            a02q_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            a04q_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            a06m_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            a17m_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            f01m_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            f12m_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            ime01w_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            ime02w_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            var1_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            x01b_data
+      ),
+      calculated_data AS (
          SELECT
             control,
             scafdate,
-            last_refresh,
             scafmetric,
             scafbreakdown,
             control_count,
@@ -417,58 +456,20 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   ORDER BY
                      scafdate
                )
-            ) * 100 AS pct_diff
+            ) * 100 AS pct_diff,
+            last_refresh
          FROM
-            (
-               SELECT
-                  *
-               FROM
-                  a02q_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  a04q_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  a06m_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  a17m_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  f01m_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  f12m_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  ime01w_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  ime02w_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  var1_data
-               UNION ALL
-               SELECT
-                  *
-               FROM
-                  x01b_data
-            )
+            combined_data
       )
+   SELECT
+      control AS `Control`,
+      scafdate AS `Date`,
+      scafmetric AS `Metric`,
+      scafbreakdown AS `Breakdown`,
+      control_count AS `Control Count`,
+      absolute_diff AS `Absolute Change vs Previous Day`,
+      pct_diff AS `Percent Change vs Previous Day`,
+      last_refresh AS `Last Refresh`,
+   FROM
+      calculated_data
 );
