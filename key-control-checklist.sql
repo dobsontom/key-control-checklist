@@ -13,8 +13,6 @@
 |            Checklist Dashboard.                                                    |
 '-----------------------------------------------------------------------------------*/
 CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_controls` AS (
-   -- Fetches the last modified time from the metadata of 
-   -- the parent table of each control.
    WITH
       control_scaffold AS (
          SELECT
@@ -24,68 +22,9 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       ),
       last_refresh_times AS (
          SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            *
          FROM
-            `revenue-assurance-prod.pulse.__TABLES__`
-         WHERE
-            table_id = 'vw_project_tasks'
-         UNION ALL
-         SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-         FROM
-            `revenue-assurance-prod.control_a04q_rebill.__TABLES__`
-         WHERE
-            table_id = 'alteryx_output'
-         UNION ALL
-         SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-         FROM
-            `revenue-assurance-prod.control_a06m_leases.__TABLES__`
-         WHERE
-            table_id = 'dim_lease_history'
-         UNION ALL
-         SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-         FROM
-            `revenue-assurance-prod.control_f12m_btp_suspense.__TABLES__`
-         WHERE
-            table_id = 'sim_tracker'
-         UNION ALL
-         SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-         FROM
-            `revenue-assurance-prod.ime_suspense.__TABLES__`
-         WHERE
-            table_id = 'EPS_Suspense'
-         UNION ALL
-         SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-         FROM
-            `revenue-assurance-prod.control_ime_sv.__TABLES__`
-         WHERE
-            table_id = 'ime_summary'
-         UNION ALL
-         SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-         FROM
-            `revenue-assurance-prod.control_var_01_leases.__TABLES__`
-         WHERE
-            table_id = 'output_var_leases_alteryx_data'
-         UNION ALL
-         SELECT
-            table_id,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-         FROM
-            `revenue-assurance-prod.pulse_src.__TABLES__`
-         WHERE
-            table_id = 'vessel'
+            `revenue-assurance-prod.key_control_checklist.control_refresh_times`
       ),
       a02q_data AS (
          SELECT
@@ -155,8 +94,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             control_scaffold scaf
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'dim_lease_history'
             LEFT JOIN (
-               -- Union the two metrics into a single field and perform a left join to the scaffold
-               -- to get a row for every day and for every metric.
+               -- Union the two metrics into a single field.
                SELECT
                   contract_start_date,
                   IF(
@@ -216,8 +154,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             control_scaffold scaf
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
             LEFT JOIN (
-               -- Union the two metrics into a single field and perform a left join to the scaffold
-               -- to get a row for every day and for every metric.
+               -- Union the two metrics into a single field.
                SELECT
                   billing_task_completed_on,
                   IFNULL(
@@ -319,14 +256,13 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            -- If the count of incidents is null (due to being missing from the main data and brought in via scaffolding) replace with zero.
+            -- If the count of incidents is null due to being missing from the data replace with zero.
             IFNULL(SUM(ime02w.control_count), 0) AS control_count
          FROM
             control_scaffold scaf
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'ime_summary'
-            -- Left join main data to the scaffold create rows for any missing day/indicent type combinations.
+            -- Unpivot multiple metrics into a single field.
             LEFT JOIN (
-               -- Unpivot multiple metrics into a single field.
                SELECT
                   ime_ime_file_date,
                   traffic_type,
@@ -378,7 +314,6 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scaf
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_var_leases_alteryx_data'
-            -- Left join main data to the scaffold create rows for any missing day/indicent type combinations.
             LEFT JOIN (
                -- Unpivot multiple metrics into a single field.
                SELECT
@@ -449,7 +384,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       pct_diff AS `Percent Change vs Previous Day`
    FROM
       (
-         -- Calculate the change in frequence of incidents to the previous day for each metric and breakdown.
+         -- Calculate the daily frequency change.
          SELECT
             control,
             scafdate,
@@ -457,14 +392,6 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scafmetric,
             scafbreakdown,
             control_count,
-            LAG(control_count) OVER (
-               PARTITION BY
-                  control,
-                  scafmetric,
-                  scafbreakdown
-               ORDER BY
-                  scafdate
-            ) AS errors_yesterday,
             control_count - LAG(control_count) OVER (
                PARTITION BY
                   control,
