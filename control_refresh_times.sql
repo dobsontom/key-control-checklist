@@ -1,5 +1,5 @@
 CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_refresh_times` AS (
-   -- Last refresh source for: A02-Q, A17-M, F01-M 
+   -- Last refresh source for: A02-Q, A17-M, and F01-M 
    SELECT
       table_id,
       TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
@@ -79,5 +79,40 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       `revenue-assurance-prod.control_gx4.__TABLES__`
    WHERE
       table_id = 'output_control_outcomes'
-
+   UNION ALL
+   -- Last refresh source for: FC01-Q
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      `revenue-assurance-prod.key_control_checklist.__TABLES__`
+   WHERE
+      table_id = 'a15q_extract'
+   UNION ALL
+   -- Last refresh source for: CH-V
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      `revenue-assurance-prod.control_fx_charterer_vessels.__TABLES__`
+   WHERE
+      table_id = 'ch_v_charterer_vessels_control_data'
+   UNION ALL
+   -- Last refresh source for: A15-Q
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      `revenue-assurance-prod.key_control_checklist.__TABLES__`
+   WHERE
+      table_id = 'a15q_extract'
+   UNION ALL
+   -- Last refresh source for: E05-W
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      `revenue-assurance-prod.control_e05w.__TABLES__`
+   WHERE
+      table_id = 'output_data'
 );
