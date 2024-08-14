@@ -373,6 +373,54 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafbreakdown,
             lr.last_refresh
       ),
+      gx4_data AS (
+         SELECT
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            COUNTIF(
+               gx4.control_group = 'Usage'
+               AND gx4.control_name = 'DAL vs BTP Usage by SSPC'
+               AND gx4.exception_type = 'Difference greater than 2.5%'
+            ) AS control_count,
+            lr.last_refresh
+         FROM
+            control_scaffold scaf
+            LEFT JOIN `revenue-assurance-prod.control_gx4.output_control_outcomes` gx4 ON scaf.scafdate = DATE(gx4.control_date)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_control_outcomes'
+         WHERE
+            scaf.control = 'GX4-JX'
+         GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            lr.last_refresh
+      ),
+      fc01_data AS (
+         SELECT
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            COUNTIF(
+               pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
+            ) AS control_count,
+            lr.last_refresh
+         FROM
+            control_scaffold scaf
+            LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01 ON scaf.scafdate = DATE(fc01.commissioning_confirm_date)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_control_outcomes'
+         WHERE
+            scaf.control = 'FC01-Q'
+         GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            lr.last_refresh
+      ),
       combined_data AS (
          SELECT
             *
@@ -423,6 +471,15 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             *
          FROM
             x01b_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            gx4_data
+         SELECT
+            *
+         FROM
+            fc01_data
       ),
       calculated_data AS (
          SELECT
