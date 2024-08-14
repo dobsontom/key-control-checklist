@@ -87,7 +87,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
    FROM
       `revenue-assurance-prod.key_control_checklist.__TABLES__`
    WHERE
-      table_id = 'a15q_extract'
+      table_id = 'fc01q_extract.'
    UNION ALL
    -- Last refresh source for: CH-V
    SELECT
