@@ -1,15 +1,16 @@
-/*-----------------------------------------------------------------------------------*
-| Name:      refresh_control_scaffold_daily                                          |
-| Author:    Tom Dobson (The Information Lab)                                        |
-| Date:      30-04-2024                                                              |
-|------------------------------------------------------------------------------------|
-| Purpose:   This script generates a scaffold (control_scaffold) for the last        |
-|            five days for each metric/breakdown combination for each of the         |
-|            controls tracked in Revenue Assurance's Key Control Checklist.          |
-|            This is required to ensure that days without any incidents have a       |
-|            row with zero ocurrences rather than no data, enabling                  |
-|            day-to-day comparisons.                                                 |
-'-----------------------------------------------------------------------------------*/
+/*
+ *===============================================================================
+ * Title:    Refresh Control Scaffold Daily
+ * Author:   Tom Dobson (The Information Lab)
+ * Date:     14-08-2024
+ *===============================================================================
+ * Purpose:  This script generates a scaffold (control_scaffold) for the last 
+ *           five days for each metric/breakdown combination for each of the 
+ *           controls tracked in Revenue Assurance's Key Control Checklist. 
+ *           This ensures that days without any incidents have a row with zero 
+ *           occurrences rather than no data, enabling day-to-day comparisons.
+ *===============================================================================
+ */
 CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_scaffold` AS (
    WITH
       date_scaffold AS (
