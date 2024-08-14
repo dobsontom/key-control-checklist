@@ -398,19 +398,19 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafbreakdown,
             lr.last_refresh
       ),
-      fc01_data AS (
+      fc01q_data AS (
          SELECT
             scaf.control,
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
             COUNTIF(
-               pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
+               fc01q.pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
             ) AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01 ON scaf.scafdate = DATE(fc01.commissioning_confirm_date)
+            LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01q ON scaf.scafdate = DATE(fc01q.commissioning_confirm_date)
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'fc01q_extract'
          WHERE
             scaf.control = 'FC01-Q'
@@ -437,6 +437,50 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'chv_extract'
          WHERE
             scaf.control = 'CH-V'
+         GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            lr.last_refresh
+      ),
+      a15q_data AS (
+         SELECT
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            COUNTIF(
+               DATE_TRUNC(a15q.billing_task_completed_on, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
+            ) AS control_count,
+            lr.last_refresh
+         FROM
+            control_scaffold scaf
+            LEFT JOIN `revenue-assurance-prod.key_control_checklist.a15q_extract` a15q ON scaf.scafdate = DATE(a15q.billing_task_completed_on)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'a15q_extract'
+         WHERE
+            scaf.control = 'A15-Q'
+         GROUP BY
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            lr.last_refresh
+      ),
+      e05w_data AS (
+         SELECT
+            scaf.control,
+            scaf.scafdate,
+            scaf.scafmetric,
+            scaf.scafbreakdown,
+            COUNTIF(e05w.review_required = 'review') AS control_count,
+            lr.last_refresh
+         FROM
+            control_scaffold scaf
+            LEFT JOIN `revenue-assurance-prod.control_e05w.output_data` e05w ON scaf.scafdate = DATE(e05w.activation_date)
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'output_data'
+         WHERE
+            scaf.control = 'E05-W'
          GROUP BY
             scaf.control,
             scaf.scafdate,
@@ -499,15 +543,26 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             *
          FROM
             gx4_data
+         UNION ALL
          SELECT
             *
          FROM
-            fc01_data
+            fc01q_data
          UNION ALL
          SELECT
             *
          FROM
             chv_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            a15q_data
+         UNION ALL
+         SELECT
+            *
+         FROM
+            e05w_data
       ),
       calculated_data AS (
          SELECT
