@@ -172,7 +172,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'Review needed - no charges matching with Vessel ID' AS scafbreakdown
             -- Table and conditions for reference
             -- FROM
-            --    `revenue-assurance-prod.control_fc01_fleet_care_review.control_monthly_data_fc01`
+            --    `revenue-assurance-prod.key_control_checklist.fc01q_extract`
             -- WHERE
             --    -- Conditions included for reference
             --    pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
@@ -183,7 +183,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'Review for charges - Not found in billing' AS scafbreakdown
             -- Table and conditions for reference
             -- FROM
-            --    `revenue-assurance-prod.control_fx_charterer_vessels.ch_v_charterer_vessels_control_data`
+            --    `revenue-assurance-prod.key_control_checklist.chv_extract`
             -- WHERE
             --    check_for_Charterer_plan_billied = 'Review for charges - Not found in billing'
          UNION ALL
@@ -193,7 +193,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'This month' AS scafbreakdown
             -- Table and conditions for reference
             --       FROM
-            --          `revenue-assurance-prod.control_a15_q_fx_new_install_and_upgrade_pricing_review.a15_q_control_monthly_data`
+            --          `revenue-assurance-prod.key_control_checklist.a15q_extract`
             --       WHERE
             --          DATE_TRUNC(billing_task_completed_on, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
          UNION ALL
