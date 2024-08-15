@@ -18,12 +18,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
          SELECT
             *
          FROM
-            UNNEST (
-               GENERATE_DATE_ARRAY(
-                  DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY),
-                  DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)
-               )
-            ) AS scafdate
+            UNNEST (GENERATE_DATE_ARRAY(DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY))) AS scafdate
       ),
       breakdown_scaffold AS (
          SELECT
@@ -120,11 +115,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
                FROM
                   revenue-assurance-prod.control_ime_sv.IME_SV_Summary UNPIVOT(
                      control_count
-                     FOR metric IN (
-                        files_collected,
-                        IME_TotRecsRecvd,
-                        IME_v_SV_difference
-                     )
+                     FOR metric IN (files_collected, IME_TotRecsRecvd, IME_v_SV_difference)
                   )
             )
          UNION ALL

@@ -36,10 +36,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafmetric,
             scaf.scafbreakdown,
             COUNTIF(
-               a02q.category1 IN (
-                  'Review for charges',
-                  'Timing issue - active billing billing task - check in the next control run'
-               )
+               a02q.category1 IN ('Review for charges', 'Timing issue - active billing billing task - check in the next control run')
             ) AS control_count,
             lr.last_refresh
          FROM
@@ -62,12 +59,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(
-               a04q.sap_exception IN (
-                  'Exception, SAP data found but totals mismatch',
-                  'SAP data not found'
-               )
-            ) AS control_count,
+            COUNTIF(a04q.sap_exception IN ('Exception, SAP data found but totals mismatch', 'SAP data not found')) AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
@@ -89,9 +81,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(
-               a06m.metric IN ('Not Billed as Planned', 'Unpriced Lease')
-            ) AS control_count,
+            COUNTIF(a06m.metric IN ('Not Billed as Planned', 'Unpriced Lease')) AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
@@ -99,11 +89,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                -- Union the two metrics into a single field.
                SELECT
                   contract_start_date,
-                  IF(
-                     billed_as_expected = TRUE,
-                     'Billed as Planned',
-                     'Not Billed as Planned'
-                  ) AS metric
+                  IF(billed_as_expected = TRUE, 'Billed as Planned', 'Not Billed as Planned') AS metric
                FROM
                   `revenue-assurance-prod.control_a06m_leases.vw_control_monthly`
                WHERE
@@ -113,11 +99,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                UNION ALL
                SELECT
                   contract_start_date,
-                  IF(
-                     lease_contract_number LIKE '%FREE%',
-                     'Unpriced Lease',
-                     'Priced Lease'
-                  ) AS metric
+                  IF(lease_contract_number LIKE '%FREE%', 'Unpriced Lease', 'Priced Lease') AS metric
                FROM
                   `revenue-assurance-prod.control_a06m_leases.vw_control_monthly`
                WHERE
@@ -146,12 +128,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(
-               a17m.metric IN (
-                  'Null SAP Net Value',
-                  'Vessel is inside committment period'
-               )
-            ) AS control_count,
+            COUNTIF(a17m.metric IN ('Null SAP Net Value', 'Vessel is inside committment period')) AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
@@ -159,10 +136,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                -- Union the two metrics into a single field.
                SELECT
                   billing_task_completed_on,
-                  IFNULL(
-                     CAST(sap_net_value AS STRING),
-                     'Null SAP Net Value'
-                  ) AS metric
+                  IFNULL(CAST(sap_net_value AS STRING), 'Null SAP Net Value') AS metric
                FROM
                   `revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated`
                WHERE
@@ -195,10 +169,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafbreakdown,
             COUNT(
                DISTINCT IF(
-                  f01m.billing_status IN (
-                     'No billing available - needs review',
-                     'Old billing - needs review'
-                  )
+                  f01m.billing_status IN ('No billing available - needs review', 'Old billing - needs review')
                   AND f01m.project_status != 'Stopped'
                   AND f01m.billed_arrears = 'Not billed in arrears',
                   project_task_order,
@@ -274,18 +245,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                FROM
                   `revenue-assurance-prod.control_ime_sv.IME_SV_Summary` UNPIVOT(
                      control_count
-                     FOR metric IN (
-                        files_collected,
-                        IME_TotRecsRecvd,
-                        IME_v_SV_difference
-                     )
+                     FOR metric IN (files_collected, IME_TotRecsRecvd, IME_v_SV_difference)
                   )
             ) ime02w ON scaf.scafdate = ime02w.ime_ime_file_date
-            AND scaf.scafbreakdown = CONCAT(
-               ime02w.traffic_type,
-               ' - ',
-               ime02w.IME_AcquisitionPortal
-            )
+            AND scaf.scafbreakdown = CONCAT(ime02w.traffic_type, ' - ', ime02w.IME_AcquisitionPortal)
             AND scaf.scafmetric = ime02w.metric
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'ime_summary'
          WHERE
@@ -407,9 +370,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(
-               fc01q.pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID'
-            ) AS control_count,
+            COUNTIF(fc01q.pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID') AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
@@ -430,9 +391,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(
-               chv.check_for_Charterer_plan_billied = 'Review for charges - Not found in billing'
-            ) AS control_count,
+            COUNTIF(chv.check_for_Charterer_plan_billied = 'Review for charges - Not found in billing') AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
@@ -453,9 +412,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(
-               DATE_TRUNC(a15q.billing_task_completed_on, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)
-            ) AS control_count,
+            COUNTIF(DATE_TRUNC(a15q.billing_task_completed_on, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)) AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
