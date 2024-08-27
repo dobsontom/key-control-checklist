@@ -475,7 +475,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             x01b_data
       ),
-      calculate_daily_freq_change AS (
+      daily_freq_change AS (
          SELECT
             *,
             control_count - LAG(control_count) OVER (
@@ -485,7 +485,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   metric_detail
                ORDER BY
                   `date`
-            ) AS absolute_change_vs_day_before,
+            ) AS daily_absolute_change,
             SAFE_DIVIDE(
                control_count - LAG(control_count) OVER (
                   PARTITION BY
@@ -503,16 +503,16 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   ORDER BY
                      `date`
                )
-            ) * 100 AS pct_change_vs_day_before
+            ) * 100 AS daily_percent_change
          FROM
             combined_data
       ),
-      add_control_last_refresh_times AS (
+      final_data_with_refresh_times AS (
          SELECT
             dfc.*,
-            ref.last_refresh_dttm
+            ref.last_refresh_time
          FROM
-            calculate_daily_freq_change dfc
+            daily_freq_change dfc
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.control_refresh_times` ref ON dfc.control = ref.control
       )
    SELECT
@@ -521,9 +521,9 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       metric,
       metric_detail,
       control_count,
-      absolute_change_vs_day_before,
-      pct_change_vs_day_before,
-      last_refresh_dttm
+      daily_absolute_change,
+      daily_percent_change,
+      last_refresh_time
    FROM
-      add_control_last_refresh_times
+      final_data_with_refresh_times
 );
