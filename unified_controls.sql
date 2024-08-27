@@ -534,7 +534,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   metric_detail
                ORDER BY
                   `date`
-            ) AS change_vs_day_before,
+            ) AS absolute_change_vs_day_before,
             SAFE_DIVIDE(
                control_count - LAG(control_count) OVER (
                   PARTITION BY
@@ -562,7 +562,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       metric,
       metric_detail,
       control_count,
-      change_vs_day_before,
+      absolute_change_vs_day_before,
       pct_change_vs_day_before,
       last_refresh_dttm
    FROM
