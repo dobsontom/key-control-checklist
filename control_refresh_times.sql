@@ -30,10 +30,55 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       table_id,
       TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
    FROM
+      -- Last refresh source for: A15-Q
+      `revenue-assurance-prod.key_control_checklist.__TABLES__`
+   WHERE
+      table_id = 'a15q_extract'
+   UNION ALL
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      -- Last refresh source for: CH-V
+      `revenue-assurance-prod.key_control_checklist.__TABLES__`
+   WHERE
+      table_id = 'chv_extract'
+   UNION ALL
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      -- Last refresh source for: E05-W
+      `revenue-assurance-prod.control_e05w.__TABLES__`
+   WHERE
+      table_id = 'output_data'
+   UNION ALL
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
       -- Last refresh source for: F12-M
       `revenue-assurance-prod.control_f12m_btp_suspense.__TABLES__`
    WHERE
       table_id = 'sim_tracker'
+   UNION ALL
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      -- Last refresh source for: FC01-Q
+      `revenue-assurance-prod.key_control_checklist.__TABLES__`
+   WHERE
+      table_id = 'fc01q_extract'
+   UNION ALL
+   SELECT
+      table_id,
+      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+   FROM
+      -- Last refresh source for: GX4-JX
+      `revenue-assurance-prod.control_gx4.__TABLES__`
+   WHERE
+      table_id = 'output_control_outcomes'
    UNION ALL
    SELECT
       table_id,
@@ -70,49 +115,4 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       `revenue-assurance-prod.pulse_src.__TABLES__`
    WHERE
       table_id = 'vessel'
-   UNION ALL
-   SELECT
-      table_id,
-      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-   FROM
-      -- Last refresh source for: GX4-JX
-      `revenue-assurance-prod.control_gx4.__TABLES__`
-   WHERE
-      table_id = 'output_control_outcomes'
-   UNION ALL
-   SELECT
-      table_id,
-      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-   FROM
-      -- Last refresh source for: FC01-Q
-      `revenue-assurance-prod.key_control_checklist.__TABLES__`
-   WHERE
-      table_id = 'fc01q_extract'
-   UNION ALL
-   SELECT
-      table_id,
-      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-   FROM
-      -- Last refresh source for: CH-V
-      `revenue-assurance-prod.key_control_checklist.__TABLES__`
-   WHERE
-      table_id = 'chv_extract'
-   UNION ALL
-   SELECT
-      table_id,
-      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-   FROM
-      -- Last refresh source for: A15-Q
-      `revenue-assurance-prod.key_control_checklist.__TABLES__`
-   WHERE
-      table_id = 'a15q_extract'
-   UNION ALL
-   SELECT
-      table_id,
-      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-   FROM
-      -- Last refresh source for: E05-W
-      `revenue-assurance-prod.control_e05w.__TABLES__`
-   WHERE
-      table_id = 'output_data'
 );
