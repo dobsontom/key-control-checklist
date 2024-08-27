@@ -18,7 +18,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       a02q_refresh AS (
          SELECT
             'A02-Q' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.pulse.__TABLES__`
          WHERE
@@ -28,7 +28,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       a04q_refresh AS (
          SELECT
             'A04-Q' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.control_a04q_rebill.__TABLES__`
          WHERE
@@ -38,7 +38,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       a06m_refresh AS (
          SELECT
             'A06-M' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.control_a06m_leases.__TABLES__`
          WHERE
@@ -48,7 +48,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       chv_refresh AS (
          SELECT
             'CH-V' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.billing_src.__TABLES__`
          WHERE
@@ -58,7 +58,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       e05w_refresh AS (
          SELECT
             'E05-W' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.control_e05w.__TABLES__`
          WHERE
@@ -68,7 +68,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       f01m_refresh AS (
          SELECT
             'F01-M' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.pulse.__TABLES__`
          WHERE
@@ -78,7 +78,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       f12m_refresh AS (
          SELECT
             'F12-M' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.control_f12m_btp_suspense.__TABLES__`
          WHERE
@@ -88,7 +88,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       fc01q_refresh AS (
          SELECT
             'FC01-Q' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.pulse_src.__TABLES__`
          WHERE
@@ -98,7 +98,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       gx4jx_refresh AS (
          SELECT
             'GX4-JX' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.control_gx4.__TABLES__`
          WHERE
@@ -108,7 +108,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       ime01w_refresh AS (
          SELECT
             'IME01-W' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.ime_suspense.__TABLES__`
          WHERE
@@ -118,7 +118,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       ime02w_refresh AS (
          SELECT
             'IME02-W' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.control_ime_sv.__TABLES__`
          WHERE
@@ -128,7 +128,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       var1_refresh AS (
          SELECT
             'VAR-1' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.control_var_01_leases.__TABLES__`
          WHERE
@@ -138,7 +138,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       x01b_refresh AS (
          SELECT
             'X01-B' AS control,
-            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
          FROM
             `revenue-assurance-prod.pulse_src.__TABLES__`
          WHERE
