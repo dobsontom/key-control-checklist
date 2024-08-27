@@ -32,7 +32,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       a02q_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(
@@ -41,14 +41,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data` a02q ON scf.scafdate = a02q.current_commissioning_confirmed_date
+            LEFT JOIN `revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data` a02q ON scf.date = a02q.current_commissioning_confirmed_date
             AND scf.metric_detail = a02q.category1
             LEFT JOIN control_refresh_times rt ON rt.control = 'A02-Q'
          WHERE
             scf.control = 'A02-Q'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -56,21 +56,21 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       a04q_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(a04q.sap_exception IN ('Exception, SAP data found but totals mismatch', 'SAP data not found')) AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.control_a04q_rebill.alteryx_output` a04q ON scf.scafdate = CAST(a04q.crc_created_on AS DATE)
+            LEFT JOIN `revenue-assurance-prod.control_a04q_rebill.alteryx_output` a04q ON scf.date = CAST(a04q.crc_created_on AS DATE)
             AND scf.metric_detail = a04q.sap_exception
             LEFT JOIN control_refresh_times rt ON rt.control = 'A04-Q'
          WHERE
             scf.control = 'A04-Q'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -78,7 +78,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       a06m_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(a06m.metric IN ('Not Billed as Planned', 'Unpriced Lease')) AS control_count,
@@ -110,14 +110,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                      contract_value IS NULL
                      OR contract_value = 0
                   )
-            ) a06m ON scf.scafdate = CAST(a06m.contract_start_date AS DATE)
+            ) a06m ON scf.date = CAST(a06m.contract_start_date AS DATE)
             AND scf.metric = a06m.metric
             LEFT JOIN control_refresh_times rt ON rt.control = 'A06-M'
          WHERE
             scf.control = 'A06-M'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -125,20 +125,20 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       a15q_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(DATE_TRUNC(a15q.billing_task_completed_on, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)) AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.key_control_checklist.a15q_extract` a15q ON scf.scafdate = DATE(a15q.billing_task_completed_on)
+            LEFT JOIN `revenue-assurance-prod.key_control_checklist.a15q_extract` a15q ON scf.date = DATE(a15q.billing_task_completed_on)
             LEFT JOIN control_refresh_times rt ON rt.control = 'A15-Q'
          WHERE
             scf.control = 'A15-Q'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -146,7 +146,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       a17m_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(a17m.metric IN ('Null SAP Net Value', 'Vessel is inside committment period')) AS control_count,
@@ -170,14 +170,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   `revenue-assurance-prod.control_a17_m_fx_retail_early_terminations_fees.ETF_control_pulse_and_sdp_fees_calculated`
                WHERE
                   is_vessel_ooc = 'Vessel is inside committment period'
-            ) a17m ON scf.scafdate = CAST(a17m.billing_task_completed_on AS DATE)
+            ) a17m ON scf.date = CAST(a17m.billing_task_completed_on AS DATE)
             AND scf.metric = a17m.metric
             LEFT JOIN control_refresh_times rt ON rt.control = 'A17-M'
          WHERE
             scf.control = 'A17-M'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -185,20 +185,20 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       chv_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(chv.check_for_charterer_plan_billied = 'Review for charges - Not found in billing') AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.key_control_checklist.chv_extract` chv ON scf.scafdate = DATE(chv.charterer_start_date)
+            LEFT JOIN `revenue-assurance-prod.key_control_checklist.chv_extract` chv ON scf.date = DATE(chv.charterer_start_date)
             LEFT JOIN control_refresh_times rt ON rt.control = 'CH-V'
          WHERE
             scf.control = 'CH-V'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -206,20 +206,20 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       e05w_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(e05w.review_required = 'Review') AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.control_e05w.output_data` e05w ON scf.scafdate = DATE(e05w.activation_date)
+            LEFT JOIN `revenue-assurance-prod.control_e05w.output_data` e05w ON scf.date = DATE(e05w.activation_date)
             LEFT JOIN control_refresh_times rt ON rt.control = 'E05-W'
          WHERE
             scf.control = 'E05-W'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -227,7 +227,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       f01m_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNT(
@@ -242,14 +242,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data` f01m ON scf.scafdate = f01m.project_implementation_confirmed_date
+            LEFT JOIN `revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data` f01m ON scf.date = f01m.project_implementation_confirmed_date
             AND scf.metric_detail = CAST(f01m.project_type AS STRING)
             LEFT JOIN control_refresh_times rt ON rt.control = 'F01-M'
          WHERE
             scf.control = 'F01-M'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -257,14 +257,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       f12m_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             IFNULL(f12m.countoferrors, 0) AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` f12m ON scf.scafdate = f12m.chargestartdate
+            LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` f12m ON scf.date = f12m.chargestartdate
             AND scf.metric_detail = CAST(f12m.errormessageid AS STRING)
             LEFT JOIN control_refresh_times rt ON rt.control = 'F12-M'
          WHERE
@@ -273,20 +273,20 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       fc01q_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(fc01q.pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID') AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01q ON scf.scafdate = DATE(fc01q.commissioning_confirm_date)
+            LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01q ON scf.date = DATE(fc01q.commissioning_confirm_date)
             LEFT JOIN control_refresh_times rt ON rt.control = 'FC01-Q'
          WHERE
             scf.control = 'FC01-Q'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -294,7 +294,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       gx4_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(
@@ -305,13 +305,13 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.control_gx4.output_control_outcomes` gx4 ON scf.scafdate = DATE(gx4.control_date)
+            LEFT JOIN `revenue-assurance-prod.control_gx4.output_control_outcomes` gx4 ON scf.date = DATE(gx4.control_date)
             LEFT JOIN control_refresh_times rt ON rt.control = 'GX4-JX'
          WHERE
             scf.control = 'GX4-JX'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -319,14 +319,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       ime01w_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             IFNULL(ime01w.countoferrors, 0) AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary` ime01w ON scf.scafdate = ime01w.chargestartdate
+            LEFT JOIN `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary` ime01w ON scf.date = ime01w.chargestartdate
             AND scf.metric_detail = ime01w.errormessageid
             LEFT JOIN control_refresh_times rt ON rt.control = 'IME01-W'
          WHERE
@@ -335,7 +335,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       ime02w_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             -- If the count of incidents is null due to being missing from the data replace with zero
@@ -343,7 +343,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            -- Unpivot multiple metrics into a single field
+            -- Unpivot three metrics into a single field
             LEFT JOIN (
                SELECT
                   ime_ime_file_date,
@@ -356,7 +356,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                      control_count
                      FOR metric IN (files_collected, ime_totrecsrecvd, ime_v_sv_difference)
                   )
-            ) ime02w ON scf.scafdate = ime02w.ime_ime_file_date
+            ) ime02w ON scf.date = ime02w.ime_ime_file_date
             AND scf.metric_detail = CONCAT(ime02w.traffic_type, ' - ', ime02w.ime_acquisitionportal)
             AND scf.metric = ime02w.metric
             LEFT JOIN control_refresh_times rt ON rt.control = 'IME02-W'
@@ -364,7 +364,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scf.control = 'IME02-W'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -372,7 +372,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       var1_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(
@@ -408,7 +408,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                      metric = 'Billed_in_SV_category'
                      AND metric_detail = 'HP - billed in last 3 months'
                   )
-            ) var1 ON scf.scafdate = CAST(var1.order_date AS DATE)
+            ) var1 ON scf.date = CAST(var1.order_date AS DATE)
             AND scf.metric = var1.metric
             AND scf.metric_detail = var1.metric_detail
             LEFT JOIN control_refresh_times rt ON rt.control = 'VAR-1'
@@ -416,7 +416,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scf.control = 'VAR-1'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -424,7 +424,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
       x01b_data AS (
          SELECT
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             COUNTIF(
@@ -436,14 +436,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            LEFT JOIN `revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels` x01b ON scf.scafdate = x01b.stopped_confirmed_date
+            LEFT JOIN `revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels` x01b ON scf.date = x01b.stopped_confirmed_date
             AND scf.metric_detail = CAST(x01b.category1 AS STRING)
             LEFT JOIN control_refresh_times rt ON rt.control = 'X01-B'
          WHERE
             scf.control = 'X01-B'
          GROUP BY
             scf.control,
-            scf.scafdate,
+            scf.date,
             scf.metric,
             scf.metric_detail,
             rt.last_refresh_dttm
@@ -524,7 +524,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             x01b_data
       ),
-      calculated_data AS (
+      daily_change_calcs AS (
          SELECT
             *,
             control_count - LAG(control_count) OVER (
@@ -533,8 +533,8 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   metric,
                   metric_detail
                ORDER BY
-                  scafdate
-            ) AS absolute_diff_vs_day_before,
+                  `date`
+            ) AS change_vs_day_before,
             SAFE_DIVIDE(
                control_count - LAG(control_count) OVER (
                   PARTITION BY
@@ -542,7 +542,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                      metric,
                      metric_detail
                   ORDER BY
-                     scafdate
+                     `date`
                ),
                LAG(control_count) OVER (
                   PARTITION BY
@@ -550,21 +550,21 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                      metric,
                      metric_detail
                   ORDER BY
-                     scafdate
+                     `date`
                )
-            ) * 100 AS pct_diff_vs_day_before
+            ) * 100 AS pct_change_vs_day_before
          FROM
             combined_data
       )
    SELECT
       control,
-      scafdate AS `date`,
+      `date`,
       metric,
       metric_detail,
       control_count,
-      absolute_diff_vs_day_before,
-      pct_diff_vs_day_before,
+      change_vs_day_before,
+      pct_change_vs_day_before,
       last_refresh_dttm
    FROM
-      calculated_data
+      daily_change_calcs
 );
