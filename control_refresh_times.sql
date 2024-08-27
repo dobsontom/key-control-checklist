@@ -4,7 +4,7 @@
  * Author:   Tom Dobson (The Information Lab)
  * Date:     14-08-2024
  *===============================================================================
- * Purpose:  This script generates a view of the last refresh times for each 
+ * Purpose:  This script generates a view of the last refresh time for each 
  *           control tracked in Revenue Assurance's Key Control Checklist. It 
  *           pulls the last modified times from the closest parent table for
  *           each control. This view is generated as part of the scheduled
