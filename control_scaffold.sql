@@ -5,7 +5,7 @@
  * Date:     14-08-2024
  *===============================================================================
  * Purpose:  This script generates a scaffold (control_scaffold) for the last 
- *           five days for each metric/breakdown combination for each of the 
+ *           five days for each metric/metric_detail combination for each of the 
  *           controls tracked in Revenue Assurance's Key Control Checklist. 
  *           This ensures that days without any incidents have a row with zero 
  *           occurrences rather than no data, enabling day-to-day comparisons.
@@ -14,7 +14,7 @@
  */
 CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_scaffold` AS (
    WITH
-      -- Create a scaffold of dates for the last 5 days
+      -- Create a scaffold of dates for the last five days
       date_scaffold AS (
          SELECT
             *
@@ -24,8 +24,8 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       a02q_scaffold AS (
          SELECT
             'A02-Q' AS control,
-            'Category 1' AS scafmetric,
-            category1 AS scafbreakdown
+            'Category 1' AS metric,
+            category1 AS metric_detail
          FROM
             (
                SELECT
@@ -38,8 +38,8 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       a04q_scaffold AS (
          SELECT
             'A04-Q' AS control,
-            'SAP Exception' AS scafmetric,
-            sap_exception AS scafbreakdown
+            'SAP Exception' AS metric,
+            sap_exception AS metric_detail
          FROM
             (
                SELECT
@@ -52,8 +52,8 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       a06m_scaffold AS (
          SELECT
             'A06-M' AS control,
-            metric AS scafmetric,
-            'None' AS scafbreakdown
+            metric,
+            'N/A' AS metric_detail
          FROM
             (
                SELECT
@@ -66,14 +66,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       a15q_scaffold AS (
          SELECT
             'A15-Q' AS control,
-            'Billing task completed on' AS scafmetric,
-            'This month' AS scafbreakdown
+            'Billing task completed on' AS metric,
+            'This month' AS metric_detail
       ),
       a17m_scaffold AS (
          SELECT
             'A17-M' AS control,
-            metric AS scafmetric,
-            'None' AS scafbreakdown
+            metric,
+            'N/A' AS metric_detail
          FROM
             (
                SELECT
@@ -86,20 +86,20 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       chv_scaffold AS (
          SELECT
             'CH-V' AS control,
-            'check_for_Charterer_plan_billied' AS scafmetric,
-            'Review for charges - Not found in billing' AS scafbreakdown
+            'check_for_Charterer_plan_billied' AS metric,
+            'Review for charges - Not found in billing' AS metric_detail
       ),
       e05w_scaffold AS (
          SELECT
             'E05-W' AS control,
-            'Review Required' AS scafmetric,
-            'Review' AS scafbreakdown
+            'Review Required' AS metric,
+            'Review' AS metric_detail
       ),
       f01m_scaffold AS (
          SELECT
             'F01-M' AS control,
-            'Tasks Remaining' AS scafmetric,
-            project_type AS scafbreakdown
+            'Tasks Remaining' AS metric,
+            project_type AS metric_detail
          FROM
             (
                SELECT
@@ -115,36 +115,36 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       f12m_scaffold AS (
          SELECT DISTINCT
             'F12-M' AS control,
-            'ErrorMessageID' AS scafmetric,
-            CAST(errormessageid AS STRING) AS scafbreakdown
+            'ErrorMessageID' AS metric,
+            CAST(errormessageid AS STRING) AS metric_detail
          FROM
             `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary`
       ),
       fc01q_scaffold AS (
          SELECT
             'FC01-Q' AS control,
-            'pulse_vs_nuda_category_1' AS scafmetric,
-            'Review needed - no charges matching with Vessel ID' AS scafbreakdown
+            'pulse_vs_nuda_category_1' AS metric,
+            'Review needed - no charges matching with Vessel ID' AS metric_detail
       ),
       gx4jx_scaffold AS (
          SELECT
             'GX4-JX' AS control,
-            'DAL vs BTP Usage by SSPC' AS scafmetric,
-            'Difference Greater than 2.5%' AS scafbreakdown
+            'DAL vs BTP Usage by SSPC' AS metric,
+            'Difference Greater than 2.5%' AS metric_detail
       ),
       ime01w_scaffold AS (
          SELECT DISTINCT
             'IME01-W' AS control,
-            'ErrorMessageID' AS scafmetric,
-            errormessageid AS scafbreakdown
+            'ErrorMessageID' AS metric,
+            errormessageid AS metric_detail
          FROM
             `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary`
       ),
       ime02w_scaffold AS (
          SELECT DISTINCT
             'IME02-W' AS control,
-            metric AS scafmetric,
-            CONCAT(traffic_type, ' - ', ime_acquisitionportal) AS scafbreakdown
+            metric,
+            CONCAT(traffic_type, ' - ', ime_acquisitionportal) AS metric_detail
          FROM
             `revenue-assurance-prod.control_ime_sv.IME_SV_Summary`
             CROSS JOIN (
@@ -160,35 +160,35 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       var1_scaffold AS (
          SELECT
             'VAR-1' AS control,
-            metric AS scafmetric,
-            breakdown AS scafbreakdown
+            metric,
+            metric_detail
          FROM
             (
                SELECT
                   'category_1' AS metric,
-                  'Review needed?' AS breakdown
+                  'Review needed?' AS metric_detail
                UNION ALL
                SELECT
                   'Billed_in_SV_category' AS metric,
-                  'HP - billed in last 3 months' AS breakdown
+                  'HP - billed in last 3 months' AS metric_detail
             )
       ),
       x01b_scaffold AS (
          SELECT DISTINCT
             'X01-B' AS control,
-            'Category 1' AS scafmetric,
-            breakdown AS scafbreakdown
+            'Category 1' AS metric,
+            metric_detail
          FROM
             (
                SELECT
-                  'Review - active temp stop vessel, why billed with original charges' AS breakdown
+                  'Review - active temp stop vessel, why billed with original charges' AS metric_detail
                UNION ALL
                SELECT
-                  'Review - why billed with suspended charges although they are reactivated' AS breakdown
+                  'Review - why billed with suspended charges although they are reactivated' AS metric_detail
             )
       ),
       -- Union individual control scaffolds
-      breakdown_scaffold AS (
+      metric_scaffold AS (
          SELECT
             *
          FROM
@@ -264,14 +264,13 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
          FROM
             x01b_scaffold
       )
-      -- Cross join date and breakdown scaffolds to create the
-      -- final control scaffold
+      -- Cross-join date and metric scaffolds to create the final control scaffold
    SELECT
-      b.control,
+      m.control,
       d.scafdate,
-      b.scafmetric,
-      b.scafbreakdown
+      m.metric,
+      m.metric_detail
    FROM
       date_scaffold d
-      CROSS JOIN breakdown_scaffold b
+      CROSS JOIN metric_scaffold m
 );
