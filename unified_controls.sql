@@ -378,11 +378,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             COUNTIF(
                (
                   var1.metric = 'category_1'
-                  AND var1.breakdown = 'Review needed?'
+                  AND var1.metric_detail = 'Review needed?'
                )
                OR (
                   var1.metric = 'Billed_in_SV_category'
-                  AND var1.breakdown = 'HP - billed in last 3 months'
+                  AND var1.metric_detail = 'HP - billed in last 3 months'
                )
             ) AS control_count,
             lr.last_refresh_dttm
@@ -393,24 +393,24 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                SELECT
                   order_date,
                   metric,
-                  breakdown
+                  metric_detail
                FROM
                   `revenue-assurance-prod.control_var_01_leases.monthly_control_output_for_review2` UNPIVOT(
-                     breakdown
+                     metric_detail
                      FOR metric IN (category_1, billed_in_sv_category)
                   )
                WHERE
                   (
                      metric = 'category_1'
-                     AND breakdown = 'Review needed?'
+                     AND metric_detail = 'Review needed?'
                   )
                   OR (
                      metric = 'Billed_in_SV_category'
-                     AND breakdown = 'HP - billed in last 3 months'
+                     AND metric_detail = 'HP - billed in last 3 months'
                   )
             ) var1 ON scaf.scafdate = CAST(var1.order_date AS DATE)
             AND scaf.metric = var1.metric
-            AND scaf.metric_detail = var1.breakdown
+            AND scaf.metric_detail = var1.metric_detail
             LEFT JOIN last_refresh_times lr ON lr.control = 'VAR-1'
          WHERE
             scaf.control = 'VAR-1'
