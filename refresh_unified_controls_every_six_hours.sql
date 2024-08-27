@@ -197,12 +197,12 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            IFNULL(f12m.CountOfErrors, 0) AS control_count,
+            IFNULL(f12m.countoferrors, 0) AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` f12m ON scaf.scafdate = f12m.ChargeStartDate
-            AND scaf.scafbreakdown = CAST(f12m.ErrorMessageID AS STRING)
+            LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` f12m ON scaf.scafdate = f12m.chargestartdate
+            AND scaf.scafbreakdown = CAST(f12m.errormessageid AS STRING)
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'sim_tracker'
          WHERE
             scaf.control = 'F12-M'
@@ -213,12 +213,12 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            IFNULL(ime01w.CountOfErrors, 0) AS control_count,
+            IFNULL(ime01w.countoferrors, 0) AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
-            LEFT JOIN `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary` ime01w ON scaf.scafdate = ime01w.ChargeStartDate
-            AND scaf.scafbreakdown = ime01w.ErrorMessageID
+            LEFT JOIN `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary` ime01w ON scaf.scafdate = ime01w.chargestartdate
+            AND scaf.scafbreakdown = ime01w.errormessageid
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'EPS_Suspense'
          WHERE
             scaf.control = 'IME01-W'
@@ -239,16 +239,16 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                SELECT
                   ime_ime_file_date,
                   traffic_type,
-                  IME_AcquisitionPortal,
+                  ime_acquisitionportal,
                   metric,
                   control_count
                FROM
                   `revenue-assurance-prod.control_ime_sv.IME_SV_Summary` UNPIVOT(
                      control_count
-                     FOR metric IN (files_collected, IME_TotRecsRecvd, IME_v_SV_difference)
+                     FOR metric IN (files_collected, ime_totrecsrecvd, ime_v_sv_difference)
                   )
             ) ime02w ON scaf.scafdate = ime02w.ime_ime_file_date
-            AND scaf.scafbreakdown = CONCAT(ime02w.traffic_type, ' - ', ime02w.IME_AcquisitionPortal)
+            AND scaf.scafbreakdown = CONCAT(ime02w.traffic_type, ' - ', ime02w.ime_acquisitionportal)
             AND scaf.scafmetric = ime02w.metric
             LEFT JOIN last_refresh_times lr ON lr.table_id = 'ime_summary'
          WHERE
@@ -288,7 +288,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                FROM
                   `revenue-assurance-prod.control_var_01_leases.monthly_control_output_for_review2` UNPIVOT(
                      breakdown
-                     FOR metric IN (category_1, Billed_in_SV_category)
+                     FOR metric IN (category_1, billed_in_sv_category)
                   )
                WHERE
                   (
@@ -391,7 +391,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(chv.check_for_Charterer_plan_billied = 'Review for charges - Not found in billing') AS control_count,
+            COUNTIF(chv.check_for_charterer_plan_billied = 'Review for charges - Not found in billing') AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
@@ -433,7 +433,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.scafmetric,
             scaf.scafbreakdown,
-            COUNTIF(e05w.review_required = 'review') AS control_count,
+            COUNTIF(e05w.review_required = 'Review') AS control_count,
             lr.last_refresh
          FROM
             control_scaffold scaf
