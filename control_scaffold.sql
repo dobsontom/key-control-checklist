@@ -53,7 +53,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
          SELECT
             'A06-M' AS control,
             metric,
-            'N/A' AS metric_detail
+            'n/a' AS metric_detail
          FROM
             (
                SELECT
@@ -73,7 +73,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
          SELECT
             'A17-M' AS control,
             metric,
-            'N/A' AS metric_detail
+            'n/a' AS metric_detail
          FROM
             (
                SELECT
