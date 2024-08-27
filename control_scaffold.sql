@@ -19,7 +19,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
          SELECT
             *
          FROM
-            UNNEST (GENERATE_DATE_ARRAY(DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY))) AS scafdate
+            UNNEST (GENERATE_DATE_ARRAY(DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY))) AS `date`
       ),
       a02q_scaffold AS (
          SELECT
@@ -67,7 +67,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
          SELECT
             'A15-Q' AS control,
             'Billing task completed on' AS metric,
-            'This month' AS metric_detail
+            'Current month' AS metric_detail
       ),
       a17m_scaffold AS (
          SELECT
@@ -267,7 +267,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
       -- Cross-join date and metric scaffolds to create the final control scaffold
    SELECT
       m.control,
-      d.scafdate,
+      d.date,
       m.metric,
       m.metric_detail
    FROM
