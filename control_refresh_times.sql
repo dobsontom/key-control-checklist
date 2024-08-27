@@ -44,6 +44,26 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
          WHERE
             table_id = 'dim_lease_history'
       ),
+      -- Refresh time for A15-Q sourced from pulse.vw_project_tasks
+      a15q_refresh AS (
+         SELECT
+            'A15-Q' AS control,
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
+         FROM
+            `revenue-assurance-prod.pulse.__TABLES__`
+         WHERE
+            table_id = 'vw_project_tasks'
+      ),
+      -- Refresh time for A17-M sourced from pulse.vw_project_tasks
+      a17m_refresh AS (
+         SELECT
+            'A17-M' AS control,
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_dttm
+         FROM
+            `revenue-assurance-prod.pulse.__TABLES__`
+         WHERE
+            table_id = 'vw_project_tasks'
+      ),
       -- Refresh time for CH-V sourced from billing_src.derived_attribute_array
       chv_refresh AS (
          SELECT
@@ -159,6 +179,16 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       *
    FROM
       a06m_refresh
+   UNION ALL
+   SELECT
+      *
+   FROM
+      a15q_refresh
+   UNION ALL
+   SELECT
+      *
+   FROM
+      a17m_refresh
    UNION ALL
    SELECT
       *
