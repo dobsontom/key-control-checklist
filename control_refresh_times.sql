@@ -1,3 +1,16 @@
+/*
+ *===============================================================================
+ * Title:    Refresh Control Refresh Times Every Six Hours
+ * Author:   Tom Dobson (The Information Lab)
+ * Date:     14-08-2024
+ *===============================================================================
+ * Purpose:  This script generates a view of the last refresh times for each 
+ *           control tracked in Revenue Assurance's Key Control Checklist. It 
+ *           pulls the last modified times from the respective tables for
+ *           each control.
+ * Docs:     https://bit.ly/key-control-docs
+ *===============================================================================
+ */
 CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_refresh_times` AS (
    SELECT
       table_id,
