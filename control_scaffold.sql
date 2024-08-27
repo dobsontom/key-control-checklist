@@ -61,6 +61,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             )
          UNION ALL
          SELECT
+            'A15-Q' AS control,
+            'Billing task completed on' AS scafmetric,
+            'This month' AS scafbreakdown
+         UNION ALL
+         SELECT
             'A17-M' AS control,
             metric AS scafmetric,
             'None' AS scafbreakdown
@@ -72,6 +77,16 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
                SELECT
                   'Vessel is inside committment period' AS metric
             )
+         UNION ALL
+         SELECT
+            'CH-V' AS control,
+            'check_for_Charterer_plan_billied' AS scafmetric,
+            'Review for charges - Not found in billing' AS scafbreakdown
+         UNION ALL
+         SELECT
+            'E05-W' AS control,
+            'Review Required' AS scafmetric,
+            'Review' AS scafbreakdown
          UNION ALL
          SELECT
             'F01-M' AS control,
@@ -95,6 +110,16 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             CAST(errormessageid AS STRING) AS scafbreakdown
          FROM
             `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary`
+         UNION ALL
+         SELECT
+            'FC01-Q' AS control,
+            'pulse_vs_nuda_category_1' AS scafmetric,
+            'Review needed - no charges matching with Vessel ID' AS scafbreakdown
+         UNION ALL
+         SELECT
+            'GX4-JX' AS control,
+            'DAL vs BTP Usage by SSPC' AS scafmetric,
+            'Difference Greater than 2.5%' AS scafbreakdown
          UNION ALL
          SELECT DISTINCT
             'IME01-W' AS control,
@@ -146,31 +171,6 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
                SELECT
                   'Review - why billed with suspended charges although they are reactivated' AS breakdown
             )
-         UNION ALL
-         SELECT
-            'GX4-JX' AS control,
-            'DAL vs BTP Usage by SSPC' AS scafmetric,
-            'Difference Greater than 2.5%' AS scafbreakdown
-         UNION ALL
-         SELECT
-            'FC01-Q' AS control,
-            'pulse_vs_nuda_category_1' AS scafmetric,
-            'Review needed - no charges matching with Vessel ID' AS scafbreakdown
-         UNION ALL
-         SELECT
-            'CH-V' AS control,
-            'check_for_Charterer_plan_billied' AS scafmetric,
-            'Review for charges - Not found in billing' AS scafbreakdown
-         UNION ALL
-         SELECT
-            'A15-Q' AS control,
-            'Billing task completed on' AS scafmetric,
-            'This month' AS scafbreakdown
-         UNION ALL
-         SELECT
-            'E05-W' AS control,
-            'Review Required' AS scafmetric,
-            'Review' AS scafbreakdown
       )
    SELECT
       b.control,
