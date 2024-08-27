@@ -86,7 +86,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scf
             LEFT JOIN (
-               -- Union the two metrics into a single field.
+               -- Union two metrics into a single field
                SELECT
                   contract_start_date,
                   IF(billed_as_expected = TRUE, 'Billed as Planned', 'Not Billed as Planned') AS metric
@@ -154,7 +154,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scf
             LEFT JOIN (
-               -- Union the two metrics into a single field.
+               -- Union two metrics into a single field
                SELECT
                   billing_task_completed_on,
                   IFNULL(CAST(sap_net_value AS STRING), 'Null SAP Net Value') AS metric
@@ -338,12 +338,12 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scf.scafdate,
             scf.metric,
             scf.metric_detail,
-            -- If the count of incidents is null due to being missing from the data replace with zero.
+            -- If the count of incidents is null due to being missing from the data replace with zero
             IFNULL(SUM(ime02w.control_count), 0) AS control_count,
             rt.last_refresh_dttm
          FROM
             control_scaffold scf
-            -- Unpivot multiple metrics into a single field.
+            -- Unpivot multiple metrics into a single field
             LEFT JOIN (
                SELECT
                   ime_ime_file_date,
@@ -389,7 +389,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scf
             LEFT JOIN (
-               -- Unpivot multiple metrics into a single field.
+               -- Unpivot multiple metric/metric_details into a single field
                SELECT
                   order_date,
                   metric,
