@@ -92,30 +92,30 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
          SELECT DISTINCT
             'F12-M' AS control,
             'ErrorMessageID' AS scafmetric,
-            CAST(ErrorMessageID AS STRING) AS scafbreakdown
+            CAST(errormessageid AS STRING) AS scafbreakdown
          FROM
-            revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary
+            `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary`
          UNION ALL
          SELECT DISTINCT
             'IME01-W' AS control,
             'ErrorMessageID' AS scafmetric,
-            ErrorMessageID AS scafbreakdown
+            errormessageid AS scafbreakdown
          FROM
-            revenue-assurance-prod.ime_suspense.IME_Tableau_Summary
+            `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary`
          UNION ALL
          SELECT DISTINCT
             'IME02-W' AS control,
             metric AS scafmetric,
-            CONCAT(traffic_type, ' - ', IME_AcquisitionPortal) AS scafbreakdown
+            CONCAT(traffic_type, ' - ', ime_acquisitionportal) AS scafbreakdown
          FROM
-            revenue-assurance-prod.control_ime_sv.IME_SV_Summary
+            `revenue-assurance-prod.control_ime_sv.IME_SV_Summary`
             CROSS JOIN (
                SELECT DISTINCT
                   metric
                FROM
-                  revenue-assurance-prod.control_ime_sv.IME_SV_Summary UNPIVOT(
+                  `revenue-assurance-prod.control_ime_sv.IME_SV_Summary` UNPIVOT(
                      control_count
-                     FOR metric IN (files_collected, IME_TotRecsRecvd, IME_v_SV_difference)
+                     FOR metric IN (files_collected, ime_totrecsrecvd, ime_v_sv_difference)
                   )
             )
          UNION ALL
