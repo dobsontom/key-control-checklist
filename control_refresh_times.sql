@@ -16,7 +16,7 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       table_id,
       TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
    FROM
-      -- Last refresh source for: A02-Q, A17-M, and F01-M 
+      -- Last refresh source for: A02-Q, A15-Q, A17-M, and F01-M 
       `revenue-assurance-prod.pulse.__TABLES__`
    WHERE
       table_id = 'vw_project_tasks'
@@ -43,19 +43,10 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       table_id,
       TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
    FROM
-      -- Last refresh source for: A15-Q
-      `revenue-assurance-prod.key_control_checklist.__TABLES__`
-   WHERE
-      table_id = 'a15q_extract'
-   UNION ALL
-   SELECT
-      table_id,
-      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-   FROM
       -- Last refresh source for: CH-V
-      `revenue-assurance-prod.key_control_checklist.__TABLES__`
+      `revenue-assurance-prod.billing_src.__TABLES__`
    WHERE
-      table_id = 'chv_extract'
+      table_id = 'derived_attribute_array'
    UNION ALL
    SELECT
       table_id,
@@ -79,10 +70,10 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       table_id,
       TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
    FROM
-      -- Last refresh source for: FC01-Q
-      `revenue-assurance-prod.key_control_checklist.__TABLES__`
+      -- Last refresh source for: FC01-Q and X01-B
+      `revenue-assurance-prod.pulse_src.__TABLES__`
    WHERE
-      table_id = 'fc01q_extract'
+      table_id = 'vessel'
    UNION ALL
    SELECT
       table_id,
@@ -119,13 +110,4 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
       `revenue-assurance-prod.control_var_01_leases.__TABLES__`
    WHERE
       table_id = 'output_var_leases_alteryx_data'
-   UNION ALL
-   SELECT
-      table_id,
-      TIMESTAMP_MILLIS(last_modified_time) AS last_refresh
-   FROM
-      -- Last refresh source for: X01-B
-      `revenue-assurance-prod.pulse_src.__TABLES__`
-   WHERE
-      table_id = 'vessel'
 );

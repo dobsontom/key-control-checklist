@@ -133,7 +133,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.a15q_extract` a15q ON scaf.scafdate = DATE(a15q.billing_task_completed_on)
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'a15q_extract'
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vw_project_tasks'
          WHERE
             scaf.control = 'A15-Q'
          GROUP BY
@@ -193,7 +193,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.chv_extract` chv ON scaf.scafdate = DATE(chv.charterer_start_date)
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'chv_extract'
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'derived_attribute_array'
          WHERE
             scaf.control = 'CH-V'
          GROUP BY
@@ -281,7 +281,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01q ON scaf.scafdate = DATE(fc01q.commissioning_confirm_date)
-            LEFT JOIN last_refresh_times lr ON lr.table_id = 'fc01q_extract'
+            LEFT JOIN last_refresh_times lr ON lr.table_id = 'vessel'
          WHERE
             scaf.control = 'FC01-Q'
          GROUP BY
