@@ -38,7 +38,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             COUNTIF(
                a02q.category1 IN ('Review for charges', 'Timing issue - active billing billing task - check in the next control run')
             ) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.control_a02_fx_completeness.output_fx_completeness_snb_control_monthly_data` a02q ON scaf.scafdate = a02q.current_commissioning_confirmed_date
@@ -51,7 +51,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       a04q_data AS (
          SELECT
@@ -60,7 +60,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             COUNTIF(a04q.sap_exception IN ('Exception, SAP data found but totals mismatch', 'SAP data not found')) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.control_a04q_rebill.alteryx_output` a04q ON scaf.scafdate = CAST(a04q.crc_created_on AS DATE)
@@ -73,7 +73,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       a06m_data AS (
          SELECT
@@ -82,7 +82,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             COUNTIF(a06m.metric IN ('Not Billed as Planned', 'Unpriced Lease')) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN (
@@ -120,7 +120,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       a15q_data AS (
          SELECT
@@ -129,7 +129,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             COUNTIF(DATE_TRUNC(a15q.billing_task_completed_on, MONTH) = DATE_TRUNC(CURRENT_DATE(), MONTH)) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.a15q_extract` a15q ON scaf.scafdate = DATE(a15q.billing_task_completed_on)
@@ -141,7 +141,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       a17m_data AS (
          SELECT
@@ -150,7 +150,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             COUNTIF(a17m.metric IN ('Null SAP Net Value', 'Vessel is inside committment period')) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN (
@@ -180,7 +180,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       chv_data AS (
          SELECT
@@ -189,7 +189,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             COUNTIF(chv.check_for_charterer_plan_billied = 'Review for charges - Not found in billing') AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.chv_extract` chv ON scaf.scafdate = DATE(chv.charterer_start_date)
@@ -201,7 +201,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       e05w_data AS (
          SELECT
@@ -210,7 +210,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             COUNTIF(e05w.review_required = 'Review') AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.control_e05w.output_data` e05w ON scaf.scafdate = DATE(e05w.activation_date)
@@ -222,7 +222,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       f01m_data AS (
          SELECT
@@ -239,7 +239,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   NULL
                )
             ) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.control_f01_m_pulse_projects_reconciliation.control_monthly_data` f01m ON scaf.scafdate = f01m.project_implementation_confirmed_date
@@ -252,7 +252,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       f12m_data AS (
          SELECT
@@ -261,7 +261,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             IFNULL(f12m.countoferrors, 0) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` f12m ON scaf.scafdate = f12m.chargestartdate
@@ -277,7 +277,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             COUNTIF(fc01q.pulse_vs_nuda_category_1 = 'Review needed - no charges matching with Vessel ID') AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.key_control_checklist.fc01q_extract` fc01q ON scaf.scafdate = DATE(fc01q.commissioning_confirm_date)
@@ -289,7 +289,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       gx4_data AS (
          SELECT
@@ -302,7 +302,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                AND gx4.control_name = 'DAL vs BTP Usage by SSPC'
                AND gx4.exception_type = 'Difference greater than 2.5%'
             ) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.control_gx4.output_control_outcomes` gx4 ON scaf.scafdate = DATE(gx4.control_date)
@@ -314,7 +314,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       ime01w_data AS (
          SELECT
@@ -323,7 +323,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric,
             scaf.metric_detail,
             IFNULL(ime01w.countoferrors, 0) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.ime_suspense.IME_Tableau_Summary` ime01w ON scaf.scafdate = ime01w.chargestartdate
@@ -340,7 +340,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric_detail,
             -- If the count of incidents is null due to being missing from the data replace with zero.
             IFNULL(SUM(ime02w.control_count), 0) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             -- Unpivot multiple metrics into a single field.
@@ -367,7 +367,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       var1_data AS (
          SELECT
@@ -385,7 +385,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   AND var1.breakdown = 'HP - billed in last 3 months'
                )
             ) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN (
@@ -419,7 +419,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       x01b_data AS (
          SELECT
@@ -433,7 +433,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   'Review - why billed with suspended charges although they are reactivated'
                )
             ) AS control_count,
-            lr.last_refresh
+            lr.last_refresh_dttm
          FROM
             control_scaffold scaf
             LEFT JOIN `revenue-assurance-prod.control_x01b_retail_fx_temprarary_stopped_vessels_review.control_output_data_temp_stop_vessels` x01b ON scaf.scafdate = x01b.stopped_confirmed_date
@@ -446,7 +446,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.scafdate,
             scaf.metric,
             scaf.metric_detail,
-            lr.last_refresh
+            lr.last_refresh_dttm
       ),
       combined_data AS (
          SELECT
@@ -534,7 +534,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   metric_detail
                ORDER BY
                   scafdate
-            ) AS absolute_diff,
+            ) AS absolute_diff_vs_day_before,
             SAFE_DIVIDE(
                control_count - LAG(control_count) OVER (
                   PARTITION BY
@@ -552,19 +552,19 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                   ORDER BY
                      scafdate
                )
-            ) * 100 AS pct_diff
+            ) * 100 AS pct_diff_vs_day_before
          FROM
             combined_data
       )
    SELECT
       control,
-      scafdate,
+      scafdate AS `date`,
       metric,
       metric_detail,
       control_count,
-      absolute_diff,
-      pct_diff,
-      last_refresh
+      absolute_diff_vs_day_before,
+      pct_diff_vs_day_before,
+      last_refresh_dttm
    FROM
       calculated_data
 );
