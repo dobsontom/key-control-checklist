@@ -6,7 +6,7 @@
  *===============================================================================
  * Purpose:  This script generates a view with the last refresh time for each 
  *           control tracked in Revenue Assurance's Key Control Checklist. It 
- *           pulls the last modified times from the closest parent table for
+ *           pulls the last modified time from the closest parent table for
  *           each control. This view is generated as part of the scheduled
  *           query refresh_unified_controls_every_six_hours.
  * Docs:     https://bit.ly/key-control-docs
