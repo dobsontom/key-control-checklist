@@ -1,0 +1,42 @@
+[sqlfluff]
+dialect = bigquery
+
+tab_space_size = 4
+max_line_length = 100
+
+[sqlfluff:indentation]
+indent_unit = space
+
+[sqlfluff:rules]
+L003 = true
+L004 = 4
+L006 = true
+L010 = after
+L013 = {"max_line_length": 80}
+L019 = leading
+L023 = false
+L040 = consistent
+
+capitalisation_policy = upper
+L014 = lower
+L018 = upper
+
+L009 = single_quotes
+
+L025 = true
+L031 = explicit
+L032 = true
+L034 = true
+L029 = before
+
+L022 = {"num_newlines": 1}
+L028 = true
+L039 = {"max_expression_length": 50}
+L042 = true
+
+LT09 = {"wildcard_policy": "multiple"}
+
+exclude_rules = L001
+
+[sqlfluff:templater:jinja]
+apply_dbt_builtins = true
