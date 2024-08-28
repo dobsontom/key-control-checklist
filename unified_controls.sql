@@ -244,7 +244,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
                     )
                     AND f01m.project_status != 'Stopped'
                     AND f01m.billed_arrears = 'Not billed in arrears',
-                    fo1m.project_task_order,
+                    f01m.project_task_order,
                     NULL
                 )
             ) AS control_count
