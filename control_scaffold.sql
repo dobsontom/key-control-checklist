@@ -151,10 +151,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
     ime02w_scaffold AS (
         SELECT DISTINCT
             'IME02-W' AS control,
-            metric,
-            CONCAT(traffic_type, ' - ', ime_acquisitionportal) AS metric_detail
+            b.metric,
+            CONCAT(a.traffic_type, ' - ', a.ime_acquisitionportal) AS metric_detail
         FROM
-            `revenue-assurance-prod.control_ime_sv.IME_SV_Summary`
+            `revenue-assurance-prod.control_ime_sv.IME_SV_Summary` AS a
         CROSS JOIN (
             SELECT DISTINCT metric
             FROM
@@ -162,7 +162,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
                 control_count
                 FOR metric IN (files_collected, ime_totrecsrecvd, ime_v_sv_difference)
             )
-        )
+        ) AS b
     ),
 
     var1_scaffold AS (
