@@ -10,7 +10,7 @@ indented_on_contents = False
 allow_implicit_indents = True
 
 [sqlfluff:rules:aliasing.expression]
-allow_scalar = True
+allow_scalar = False
 
 [sqlfluff:rules:capitalisation.keywords]
 capitalisation_policy = upper
