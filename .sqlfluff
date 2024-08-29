@@ -52,3 +52,6 @@ enabled = True
 
 [sqlfluff:rules:structure.column_order]
 enabled = True
+
+[sqlfluff:rules:convention.not_equal]
+preferred_not_equal_style = c_style
