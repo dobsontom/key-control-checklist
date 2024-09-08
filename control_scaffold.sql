@@ -17,13 +17,13 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
     -- Create a scaffold of dates for the last five days
     date_scaffold AS (
         SELECT
-            *
+            control_date
         FROM
             UNNEST(
                 GENERATE_DATE_ARRAY(
                     DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)
                 )
-            ) AS `date`
+            ) AS control_date
     ),
 
     a02q_scaffold AS (
@@ -32,13 +32,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'Category 1' AS metric,
             category1 AS metric_detail
         FROM
-            (
-                SELECT 'Review for charges' AS category1
-                UNION ALL
-                SELECT
-                    'Timing issue - active billing billing task - check in the next control run'
-                        AS category1
-            )
+            UNNEST([
+                'Review for charges',
+                'Timing issue - active billing billing task - check in the next control run'
+            ]) AS category1
     ),
 
     a04q_scaffold AS (
@@ -47,11 +44,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'SAP Exception' AS metric,
             sap_exception AS metric_detail
         FROM
-            (
-                SELECT 'Exception, SAP data found but totals mismatch' AS sap_exception
-                UNION ALL
-                SELECT 'SAP data not found' AS sap_exception
-            )
+            UNNEST([
+                'Exception, SAP data found but totals mismatch',
+                'SAP data not found'
+            ]) AS sap_exception
     ),
 
     a06m_scaffold AS (
@@ -60,11 +56,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             metric,
             'n/a' AS metric_detail
         FROM
-            (
-                SELECT 'Not Billed as Planned' AS metric
-                UNION ALL
-                SELECT 'Unpriced Lease' AS metric
-            )
+            UNNEST([
+                'Not Billed as Planned',
+                'Unpriced Lease'
+            ]) AS metric
     ),
 
     a15q_scaffold AS (
@@ -80,11 +75,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             metric,
             'n/a' AS metric_detail
         FROM
-            (
-                SELECT 'Null SAP Net Value' AS metric
-                UNION ALL
-                SELECT 'Vessel is inside committment period' AS metric
-            )
+            UNNEST([
+                'Null SAP Net Value',
+                'Vessel is inside committment period'
+            ]) AS metric
     ),
 
     chv_scaffold AS (
@@ -107,13 +101,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'Tasks Remaining' AS metric,
             project_type AS metric_detail
         FROM
-            (
-                SELECT 'Contract change' AS project_type
-                UNION ALL
-                SELECT 'New installation' AS project_type
-                UNION ALL
-                SELECT 'Upgrade installation' AS project_type
-            )
+            UNNEST([
+                'Contract change',
+                'New installation',
+                'Upgrade installation'
+            ]) AS project_type
     ),
 
     f12m_scaffold AS (
@@ -171,15 +163,13 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             metric,
             metric_detail
         FROM
-            (
-                SELECT
-                    'category_1' AS metric,
-                    'Review needed?' AS metric_detail
-                UNION ALL
-                SELECT
+            UNNEST([
+                STRUCT('category_1' AS metric, 'Review needed?' AS metric_detail),
+                STRUCT(
                     'Billed_in_SV_category' AS metric,
                     'HP - billed in last 3 months' AS metric_detail
-            )
+                )
+            ])
     ),
 
     x01b_scaffold AS (
@@ -188,15 +178,10 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             'Category 1' AS metric,
             metric_detail
         FROM
-            (
-                SELECT
-                    'Review - active temp stop vessel, why billed with original charges'
-                        AS metric_detail
-                UNION ALL
-                SELECT
-                    'Review - why billed with suspended charges although they are reactivated'
-                        AS metric_detail
-            )
+            UNNEST([
+                'Review - active temp stop vessel, why billed with original charges',
+                'Review - why billed with suspended charges although they are reactivated'
+            ]) AS metric_detail
     ),
 
     -- Union individual control scaffolds
@@ -280,7 +265,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
     -- Cross-join date and metric scaffolds to create the final control scaffold
     SELECT
         m.control,
-        d.date,
+        d.control_date,
         m.metric,
         m.metric_detail
     FROM
