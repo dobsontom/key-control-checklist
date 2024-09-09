@@ -397,16 +397,7 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.control_date,
             scaf.metric,
             scaf.metric_detail,
-            COUNTIF(
-                (
-                    var1.metric = 'category_1'
-                    AND var1.metric_detail = 'Review needed?'
-                )
-                OR (
-                    var1.metric = 'Billed_in_SV_category'
-                    AND var1.metric_detail = 'HP - billed in last 3 months'
-                )
-            ) AS control_count
+            COUNTIF(var1.metric IS NOT NULL) AS control_count#
         FROM
             control_scaffold AS scaf
         LEFT JOIN (
