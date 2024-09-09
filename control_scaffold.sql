@@ -16,12 +16,12 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
     WITH
     -- Create a scaffold of dates for the last five days
     date_scaffold AS (
-        SELECT
-            control_date
+        SELECT control_date
         FROM
             UNNEST(
                 GENERATE_DATE_ARRAY(
-                    DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 1 DAY)
+                    DATE_SUB(CURRENT_DATE(), INTERVAL 5 DAY),
+                    DATE_SUB(CURRENT_DATE(), INTERVAL 1 DAY)
                 )
             ) AS control_date
     ),
