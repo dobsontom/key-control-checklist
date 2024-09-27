@@ -157,6 +157,17 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
             table_id = 'ime_summary'
     ),
 
+    -- Refresh time for PR-1 sourced from control_pr1_provisioning.controls_history
+    pr1_refresh AS (
+        SELECT
+            'PR-1' AS control,
+            TIMESTAMP_MILLIS(last_modified_time) AS last_refresh_time
+        FROM
+            `revenue-assurance-prod.control_pr1_provisioning.__TABLES__`
+        WHERE
+            table_id = 'controls_history'
+    ),
+
     -- Refresh time for VAR-1 sourced from control_var_01_leases.output_var_leases_alteryx_data
     var1_refresh AS (
         SELECT
@@ -245,6 +256,11 @@ CREATE OR REPLACE VIEW `revenue-assurance-prod.key_control_checklist.control_ref
             *
         FROM
             ime02w_refresh
+        UNION ALL
+        SELECT
+            *
+        FROM
+            pr1_refresh
         UNION ALL
         SELECT
             *
