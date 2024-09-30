@@ -9,7 +9,7 @@
  *           Each control's data is joined to a scaffold (control_scaffold) to
  *           ensure that days without any incidents have a row with zero
  *           occurrences rather than no data, enabling day-to-day comparisons.
- *           The data for each control is minimized, combined into a unified
+ *           The data for each control is minimised, combined into a unified
  *           structure, and stored in the table 'unified_controls', which feeds
  *           the Key Control Checklist Dashboard.
  * Docs:     https://bit.ly/key-control-docs
@@ -263,26 +263,26 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             scaf.metric_detail
     ),
 
-    f12m_data AS (
-        SELECT
-            scaf.control,
-            scaf.control_date,
-            scaf.metric,
-            scaf.metric_detail,
-            COALESCE(SUM(f12m.countoferrors), 0) AS control_count
-        FROM
-            control_scaffold AS scaf
-        LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` AS f12m
-            ON scaf.control_date = f12m.chargestartdate
-            AND scaf.metric_detail = CAST(f12m.errormessageid AS STRING)
-        WHERE
-            scaf.control = 'F12-M'
-        GROUP BY
-            scaf.control,
-            scaf.control_date,
-            scaf.metric,
-            scaf.metric_detail
-    ),
+    -- f12m_data AS (
+    --     SELECT
+    --         scaf.control,
+    --         scaf.control_date,
+    --         scaf.metric,
+    --         scaf.metric_detail,
+    --         COALESCE(SUM(f12m.countoferrors), 0) AS control_count
+    --     FROM
+    --         control_scaffold AS scaf
+    --     LEFT JOIN `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary` AS f12m
+    --         ON scaf.control_date = f12m.chargestartdate
+    --         AND scaf.metric_detail = CAST(f12m.errormessageid AS STRING)
+    --     WHERE
+    --         scaf.control = 'F12-M'
+    --     GROUP BY
+    --         scaf.control,
+    --         scaf.control_date,
+    --         scaf.metric,
+    --         scaf.metric_detail
+    -- ),
 
     fc01q_data AS (
         SELECT
@@ -384,6 +384,30 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             AND scaf.metric = ime02w.metric
         WHERE
             scaf.control = 'IME02-W'
+        GROUP BY
+            scaf.control,
+            scaf.control_date,
+            scaf.metric,
+            scaf.metric_detail
+    ),
+
+    
+    pr1_data AS (
+        SELECT
+            scaf.control,
+            scaf.control_date,
+            scaf.metric,
+            scaf.metric_detail,
+            COUNT(*) AS control_count
+        FROM
+            `revenue-assurance-prod.control_pr1_provisioning.controls_history` AS pr1
+        LEFT JOIN
+            control_scaffold AS scaf
+            ON DATE(pr1.control_timestamp) = scaf.control_date
+            AND pr1.product_group = scaf.metric
+            AND pr1.exception_type = scaf.metric_detail
+        WHERE
+            scaf.control = 'PR-1'
         GROUP BY
             scaf.control,
             scaf.control_date,
@@ -503,11 +527,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
         FROM
             f01m_data
         UNION ALL
-        SELECT
-            *
-        FROM
-            f12m_data
-        UNION ALL
+        -- SELECT
+        --     *
+        -- FROM
+        --     f12m_data
+        -- UNION ALL
         SELECT
             *
         FROM
@@ -527,6 +551,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.unified_co
             *
         FROM
             ime02w_data
+        UNION ALL
+        SELECT
+            *
+        FROM
+            pr1_data
         UNION ALL
         SELECT
             *

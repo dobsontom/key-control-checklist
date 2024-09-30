@@ -108,14 +108,14 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             ]) AS project_type
     ),
 
-    f12m_scaffold AS (
-        SELECT DISTINCT
-            'F12-M' AS control,
-            'ErrorMessageID' AS metric,
-            CAST(errormessageid AS STRING) AS metric_detail
-        FROM
-            `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary`
-    ),
+    -- f12m_scaffold AS (
+    --     SELECT DISTINCT
+    --         'F12-M' AS control,
+    --         'ErrorMessageID' AS metric,
+    --         CAST(errormessageid AS STRING) AS metric_detail
+    --     FROM
+    --         `revenue-assurance-prod.control_f12m_btp_suspense.tableau_summary`
+    -- ),
 
     fc01q_scaffold AS (
         SELECT
@@ -155,6 +155,40 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
                 FOR metric IN (files_collected, ime_totrecsrecvd, ime_v_sv_difference)
             )
         ) AS b
+    ),
+
+    pr1_scaffold AS (
+        SELECT
+            'PR-1' AS control,
+            product_group AS metric,
+            exception_type AS metric_detail
+        FROM
+            UNNEST([
+                'BGAN',
+                'Classic Aero',
+                'Fleet Mail',
+                'GX',
+                'Inm-C'
+            ]) AS product_group
+        CROSS JOIN (
+            SELECT exception_type
+            FROM
+                UNNEST([
+                    'Bill no service',
+                    'Duplicates in billing',
+                    'Rate plan mismatch',
+                    'Rate plan mismatch - NULL in billing',
+                    'Rate plan mismatch - NULL in provisioning',
+                    'Rate plan mismatch - Possible timing issue',
+                    'Rate plan mismatch - Retail service',
+                    'Service no bill',
+                    'Service no bill - Possible timing issue',
+                    'Service no bill - Retail service',
+                    'Status mismatch',
+                    'Status mismatch - Possible timing issue',
+                    'Status mismatch - Retail service'
+                ]) AS exception_type
+        )
     ),
 
     var1_scaffold AS (
@@ -226,11 +260,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
         FROM
             f01m_scaffold
         UNION ALL
-        SELECT
-            *
-        FROM
-            f12m_scaffold
-        UNION ALL
+        -- SELECT
+        --     *
+        -- FROM
+        --     f12m_scaffold
+        -- UNION ALL
         SELECT
             *
         FROM
@@ -250,6 +284,11 @@ CREATE OR REPLACE TABLE `revenue-assurance-prod.key_control_checklist.control_sc
             *
         FROM
             ime02w_scaffold
+        UNION ALL
+        SELECT
+            *
+        FROM
+            pr1_scaffold
         UNION ALL
         SELECT
             *
